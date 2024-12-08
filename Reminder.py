@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 from tkcalendar import DateEntry
 from tktimepicker import SpinTimePickerModern
 from tktimepicker import constants
+import os
 
 containerBg = "#0D0D0D" 
 sidebarBg = "#1a1c1e"  
@@ -13,12 +14,12 @@ textbg = "#212121"
 class ReminderApp:
     def reminderApp(container, root):
         clearFrame(container)
-        ReminderApp.add_icon = Image.open('Add.png')
+        ReminderApp.add_icon = Image.open('icon/Add.png')
         ReminderApp.add_icon = ReminderApp.add_icon.resize((200,35))
         ReminderApp.add_icon = ImageTk.PhotoImage(ReminderApp.add_icon)
         btAdd = Button(
             container,
-            text="+ ADD NEW REMINDER",
+            text="ADD NEW REMINDER",
             fg= "white",
             font=("Times", 12,"bold"),
             compound= CENTER,
@@ -164,7 +165,7 @@ def create_new_reminder(root):
         hoverbg="#2e2d2d",     
         hovercolor="#ffffff",  
         clickedbg="#404040",   
-        clickedcolor="#d73333" 
+        clickedcolor="#d73333",
         )
     time_picker.configure_separator(bg="#212121", fg="#ffffff")
     time_picker.pack()
@@ -178,8 +179,8 @@ def create_new_reminder(root):
     )
     lbRecurring.pack(pady=10)
 
-    recurring  = ["Don't repeat", "Everyday", "Every week", "Every month", "Every year"]
-    setrecurringCombobox = ttk.Combobox(setTimeFrame, values= recurring,font=("Times", 10))
+    recurrence_type  = ["Don't repeat", "Everyday", "Every week", "Every month", "Every year"]
+    setrecurringCombobox = ttk.Combobox(setTimeFrame, values= recurrence_type,font=("Times", 10),width=30)
     setrecurringCombobox.set("Don't repeat")
     setrecurringCombobox.pack()
 
@@ -199,11 +200,27 @@ def create_new_reminder(root):
             bg="WHITE",
             activebackground= containerBg,
             bd=0,
+            command= lambda: savedata()
         )
     btSubmit.pack (side=BOTTOM,pady=10)
 
-    # def savedata():
-        
+    def savedata():
+        title = inputTitle.get("1.0",'end-1c')
+        description = inputDescription.get("1.0",'end-1c')
+        date = date_var.get()
+        time = time_picker.time()
+        recurrence_type = setrecurringCombobox.get()
+
+        if not os.path.exists("Reminder_Data_Record.txt"):
+            with open("Reminder_Data_Record.txt",'w') as file:
+                file.write("")
+
+        data = f"TITLE: {title} \nDESCRIPTION: {description} \nDATE: {date} \nTIME: {"{}:{} {}".format(*time)} \nRECURRENCE TYPE: {recurrence_type}"
+        with open("Reminder_Data_Record.txt", 'w') as file:
+            file.write(data)
+        file.close()
+
+        window.destroy()
 
     def animate_setTime():
         if not ReminderApp.setTimeFrame_expanded:
