@@ -66,7 +66,7 @@ class MainMenu:
     def create_buttons(self):
         """Create and position navigation buttons"""
         # Menu toggle button
-        self.menu_icon = Image.open('menu.png')
+        self.menu_icon = Image.open('icon/menu.png')
         self.menu_icon = self.menu_icon.resize((30,30))
         self.menu_icon = ImageTk.PhotoImage(self.menu_icon)
         self.btMenu = Button(
@@ -111,7 +111,7 @@ class MainMenu:
         )
         self.home_btn_indicator.place(x=3,y=43, height=40,width=3)
 
-        self.home_icon = Image.open('home.png')
+        self.home_icon = Image.open('icon/home.png')
         self.home_icon = self.home_icon.resize((40,40))
         self.home_icon= ImageTk.PhotoImage(self.home_icon)
         btHome = Button(
@@ -131,7 +131,7 @@ class MainMenu:
             bg=sidebarBg
         )
         self.expense_btn_indicator.place(x=3,y=125, height=40,width=3)
-        self.expense_icon = Image.open('expense.png')
+        self.expense_icon = Image.open('icon/expense.png')
         self.expense_icon = self.expense_icon.resize((40,40))
         self.expense_icon = ImageTk.PhotoImage(self.expense_icon)
         btexpense = Button(
@@ -151,7 +151,7 @@ class MainMenu:
             bg=sidebarBg
         )
         self.reminder_btn_indicator.place(x=3,y=203, height=40,width=3)
-        self.reminder_icon = Image.open('bell.png')
+        self.reminder_icon = Image.open('icon/bell.png')
         self.reminder_icon = self.reminder_icon.resize((40,40))
         self.reminder_icon = ImageTk.PhotoImage(self.reminder_icon)
         btReminder = Button(
@@ -171,7 +171,7 @@ class MainMenu:
             bg=sidebarBg
         )
         self.note_btn_indicator.place(x=3,y=282, height=40,width=3)
-        self.note_icon = Image.open('note.png')
+        self.note_icon = Image.open('icon/note.png')
         self.note_icon = self.note_icon.resize((40,40))
         self.note_icon = ImageTk.PhotoImage(self.note_icon)
         btNote = Button(
