@@ -13,8 +13,9 @@ from PIL import Image
 import io
 
 class NotesOrganizer:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, container, secondSidebar):
+        container
+        secondSidebar
         # self.root = root
         # self.root.title("Notes Organizer")
         # self.root.geometry("1200x700")
