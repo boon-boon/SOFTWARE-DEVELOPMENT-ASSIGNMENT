@@ -209,6 +209,7 @@ class MainMenu:
         for widget in container.winfo_children():
             widget.destroy()
 
+    
 def main():
     app = MainMenu()
     app.run()
