@@ -1,6 +1,8 @@
 from tkinter import *
 from PIL import Image,ImageTk
 from Reminder import ReminderApp
+from Note_Organizer import NotesOrganizer
+
 
 sidebarBg = "#1a1c1e"       
 topNavigationBg = "#1E1E1E" 
@@ -17,7 +19,6 @@ class MainMenu:
         self.sidebar_min_width = 0
         self.sidebar_max_width = 250
         self.animation_speed = 10
-
         # Create UI components
         self.create_ui()
         self.create_sidebar_content()
@@ -182,7 +183,7 @@ class MainMenu:
             bg=sidebarBg,
             bd=0,
             activebackground=sidebarBg,
-            command=lambda: self.switch_indication(self.note_btn_indicator)
+            command=lambda: [self.switch_indication(self.note_btn_indicator),NotesOrganizer(self.content_frame,self.secondSidebar)]
         )
         btNote.place(x=15, y= 279)
 
