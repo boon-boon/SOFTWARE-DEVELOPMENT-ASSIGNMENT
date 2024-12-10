@@ -6,7 +6,9 @@ from PIL import Image, ImageTk
 from tkcalendar import DateEntry
 from tktimepicker import SpinTimePickerModern
 from tktimepicker import constants
+import datetime 
 import os
+import time
 
 containerBg = "#0D0D0D" 
 sidebarBg = "#1a1c1e"  
@@ -110,6 +112,7 @@ def create_new_reminder(root):
     setTimeFrame.pack(fill=X)
     setTimeFrame.pack_propagate(FALSE)
 
+    isCheckboxTick = IntVar()
     setTimeCheckbox = Checkbutton(
         setTimeFrame,
         text="Set Time",
@@ -118,7 +121,10 @@ def create_new_reminder(root):
         command=lambda:animate_setTime(),
         bg=containerBg,
         activebackground=containerBg,
-        selectcolor="black"
+        selectcolor="black",
+        variable= isCheckboxTick,
+        onvalue=1,
+        offvalue= 0
         )
     setTimeCheckbox.pack()
 
@@ -200,27 +206,68 @@ def create_new_reminder(root):
             bg="WHITE",
             activebackground= containerBg,
             bd=0,
-            command= lambda: savedata()
+            command= lambda: set_notification()
         )
     btSubmit.pack (side=BOTTOM,pady=10)
 
-    def savedata():
+    def set_notification():
         title = inputTitle.get("1.0",'end-1c')
         description = inputDescription.get("1.0",'end-1c')
         date = date_var.get()
-        time = time_picker.time()
+        selected_time = time_picker.time()
         recurrence_type = setrecurringCombobox.get()
+        isCheckboxTick_type = isCheckboxTick.get()
+        current_date = datetime.date.today()
+        current_year = current_date.year
+        current_month = current_date.month
+        current_day = current_date.day
+        selected_date = date_entry.get_date()
+        year = selected_date.year
+        month = selected_date.month
+        day = selected_date.day
+        current_hour = int( time.strftime("%H") )
+        current_minute = int (time.strftime("%M") )
+        minute = selected_time [1]
+        if selected_time[2]== "PM":
+            hour = selected_time[0] + 12
+        else:
+            hour = selected_time[0]
 
+        print (current_hour, current_minute)
+
+        if year < current_year or (year == current_year and month < current_month) or (year == current_year and month == current_month and day < current_day):
+            messagebox.showerror("Alert", "You must enter a valid date!")
+        elif selected_date == current_date and (hour < current_hour or minute < current_minute):
+            messagebox.showerror("Alert", "You must enter a valid time!")
+        elif title.strip() == "" or description.strip() == "":
+            messagebox.showerror("Alert", "All fields are required!")
+        elif not isCheckboxTick_type:  # Assumes 0 is False and 1 is True for the checkbox
+            messagebox.showerror("Alert", "Set time is required!")
+        else:
+            response = messagebox.askyesno("Notifier Set", "Set notification?")
+            if response:  # User clicks "Yes"
+                savedata(title=title,description=description,date=date,selected_time=selected_time,recurrence_type=recurrence_type)
+                window.destroy()
+                # time.sleep(min_to_sec)
+                notification.notify(
+                    title=title,
+                    message=description,
+                    app_name="Notifier", 
+                    app_icon="icon/ico.ico",
+                    toast=True,
+                    timeout=10
+                    )
+            
+    def savedata(title,description,date,selected_time,recurrence_type):
         if not os.path.exists("Reminder_Data_Record.txt"):
             with open("Reminder_Data_Record.txt",'w') as file:
                 file.write("")
 
-        data = f"TITLE: {title} \nDESCRIPTION: {description} \nDATE: {date} \nTIME: {"{}:{} {}".format(*time)} \nRECURRENCE TYPE: {recurrence_type}"
-        with open("Reminder_Data_Record.txt", 'w') as file:
+        data = f"TITLE: {title} \nDESCRIPTION: {description} \nDATE: {date} \nTIME: {"{}:{} {}".format(*selected_time)} \nRECURRENCE TYPE: {recurrence_type}\n"
+        with open("Reminder_Data_Record.txt", 'a') as file:
             file.write(data)
         file.close()
-
-        window.destroy()
+        
 
     def animate_setTime():
         if not ReminderApp.setTimeFrame_expanded:
