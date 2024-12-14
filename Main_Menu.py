@@ -7,11 +7,6 @@ sidebarBg = "#1a1c1e"
 topNavigationBg = "#1E1E1E" 
 containerBg = "#0D0D0D"    
 class MainMenu:
-    @staticmethod
-    def clearFrame(container):
-        for widget in container.winfo_children():
-            widget.destroy()
-    
     def __init__(self):
         # App configuration
         self.window = Tk()
@@ -213,7 +208,6 @@ class MainMenu:
     def run(self):
         self.window.mainloop()
         
-    @staticmethod
     def clearFrame(container):
         for widget in container.winfo_children():
             widget.destroy()
