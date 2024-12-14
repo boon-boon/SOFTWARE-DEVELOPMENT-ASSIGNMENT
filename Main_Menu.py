@@ -3,6 +3,7 @@ from PIL import Image,ImageTk
 from Reminder import ReminderApp
 from Final_Expense_Tracker import Expense_Tracker
 
+
 sidebarBg = "#1a1c1e"       
 topNavigationBg = "#1E1E1E" 
 containerBg = "#0D0D0D"    
@@ -18,7 +19,6 @@ class MainMenu:
         self.sidebar_min_width = 0
         self.sidebar_max_width = 250
         self.animation_speed = 10
-
         # Create UI components
         self.create_ui()
         self.create_sidebar_content()
@@ -68,7 +68,7 @@ class MainMenu:
     def create_buttons(self):
         """Create and position navigation buttons"""
         # Menu toggle button
-        self.menu_icon = Image.open('menu.png')
+        self.menu_icon = Image.open('icon/menu.png')
         self.menu_icon = self.menu_icon.resize((30,30))
         self.menu_icon = ImageTk.PhotoImage(self.menu_icon)
         self.btMenu = Button(
@@ -112,7 +112,7 @@ class MainMenu:
         )
         self.home_btn_indicator.place(x=3,y=43, height=40,width=3)
 
-        self.home_icon = Image.open('home.png')
+        self.home_icon = Image.open('icon/home.png')
         self.home_icon = self.home_icon.resize((40,40))
         self.home_icon= ImageTk.PhotoImage(self.home_icon)
         btHome = Button(
@@ -132,7 +132,7 @@ class MainMenu:
             bg=sidebarBg
         )
         self.expense_btn_indicator.place(x=3,y=125, height=40,width=3)
-        self.expense_icon = Image.open('expense.png')
+        self.expense_icon = Image.open('icon/expense.png')
         self.expense_icon = self.expense_icon.resize((40,40))
         self.expense_icon = ImageTk.PhotoImage(self.expense_icon)
         btexpense = Button(
@@ -152,7 +152,7 @@ class MainMenu:
             bg=sidebarBg
         )
         self.reminder_btn_indicator.place(x=3,y=203, height=40,width=3)
-        self.reminder_icon = Image.open('bell.png')
+        self.reminder_icon = Image.open('icon/bell.png')
         self.reminder_icon = self.reminder_icon.resize((40,40))
         self.reminder_icon = ImageTk.PhotoImage(self.reminder_icon)
         btReminder = Button(
@@ -163,16 +163,16 @@ class MainMenu:
             bg=sidebarBg,
             bd=0,
             activebackground=sidebarBg,
-            command=lambda: [self.switch_indication(self.reminder_btn_indicator),ReminderApp.reminderApp(self.content_frame, self.window)]
+            command=lambda: [self.switch_indication(self.reminder_btn_indicator),ReminderApp(container = self.content_frame)]
         )
         btReminder.place(x=15, y= 202)
-
+        
         self.note_btn_indicator = Label(
             self.sidebar,
             bg=sidebarBg
         )
         self.note_btn_indicator.place(x=3,y=282, height=40,width=3)
-        self.note_icon = Image.open('note.png')
+        self.note_icon = Image.open('icon/note.png')
         self.note_icon = self.note_icon.resize((40,40))
         self.note_icon = ImageTk.PhotoImage(self.note_icon)
         btNote = Button(
@@ -183,7 +183,7 @@ class MainMenu:
             bg=sidebarBg,
             bd=0,
             activebackground=sidebarBg,
-            command=lambda: self.switch_indication(self.note_btn_indicator)
+            command=lambda: [self.switch_indication(self.note_btn_indicator),NotesOrganizer(self.content_frame,self.secondSidebar)]
         )
         btNote.place(x=15, y= 279)
 
@@ -210,6 +210,7 @@ class MainMenu:
         for widget in container.winfo_children():
             widget.destroy()
 
+    
 def main():
     app = MainMenu()
     app.run()
