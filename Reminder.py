@@ -10,291 +10,392 @@ import datetime
 import os
 import time
 
+
 containerBg = "#0D0D0D" 
 sidebarBg = "#1a1c1e"  
 textbg = "#212121" 
+
 class ReminderApp:
-    def reminderApp(container, root):
-        clearFrame(container)
-        ReminderApp.add_icon = Image.open('icon/Add.png')
-        ReminderApp.add_icon = ReminderApp.add_icon.resize((200,35))
-        ReminderApp.add_icon = ImageTk.PhotoImage(ReminderApp.add_icon)
+    def __init__(self, container):
+        self.container = container
+        self.clearFrame(self.container)
+        
+        self.add_icon = Image.open('icon/Add.png')
+        self.add_icon = self.add_icon.resize((200,35))
+        self.add_icon = ImageTk.PhotoImage(self.add_icon)
+        
         btAdd = Button(
-            container,
+            self.container,
             text="ADD NEW REMINDER",
-            fg= "white",
-            font=("Times", 12,"bold"),
-            compound= CENTER,
-            image=ReminderApp.add_icon,
+            fg="white",
+            font=("Times", 12, "bold"),
+            compound=CENTER,
+            image=self.add_icon,
             bg=containerBg,
-            activebackground= containerBg,
+            activebackground=containerBg,
             bd=0,
-            command=lambda: create_new_reminder(root)
+            command=lambda: self.create_new_reminder()
         )
-        btAdd.place (x=1240, y=15)
+        btAdd.place(x=1240, y=15)
 
         lbReminder = Label(
-            container,
+            self.container,
             text="REMINDER",
-            fg= "white",
-            font=("Times", 20,"bold"),
+            fg="white",
+            font=("Times", 20, "bold"),
             bg=containerBg,
-            activebackground= containerBg,
+            activebackground=containerBg,
             bd=0,
-            )
+        )
         lbReminder.place(x=23, y=15)
 
-def create_new_reminder(root):
-    window = Toplevel(root)
-    window.title("Add New Reminder")
-    window.geometry("500x600")
-    window.configure(bg=containerBg)
+    def clearFrame(self, container):
+        for widget in container.winfo_children():
+            widget.destroy()
 
-    content_Frame = Frame(
-        window,
-        height= 600,
-        width= 500,
-        bg=containerBg,
-    )
-    content_Frame.pack(fill=BOTH)
+    def create_new_reminder(self):
+        self.window = Toplevel(self.container)
+        self.window.title("Add New Reminder")
+        self.window.geometry("500x600")
+        self.window.configure(bg=containerBg)
 
-    lbTitle = Label(
-        content_Frame,
-        text="TITLE:",
-        font= ("Times", 15),
-        fg="white",
-        bg=containerBg
-    )
-    lbTitle.pack(pady=10)
-
-    inputTitle = Text(
-        content_Frame,
-        bd=0,
-        fg="white",
-        font=("Times", 15),
-        bg=textbg,
-        width=40,
-        height=2,
-        insertbackground = "white"
-    )
-    inputTitle.pack()
-
-    lbDescription = Label(
-        content_Frame,
-        text="DESCRIPTION:",
-        font= ("Times", 15),
-        fg="white",
-        bg=containerBg
-    )
-    lbDescription.pack(pady=10)
-
-    inputDescription = Text(
-        content_Frame,
-        bd=0,
-        fg="white",
-        font=("Times", 15),
-        bg=textbg,
-        width=40,
-        height=2,
-        insertbackground = "white"
-    )
-    inputDescription.pack()
-
-    ReminderApp.setTimeFrame_expanded = False
-    setTimeFrame_min_height = 50
-    setTimeFrame_max_height = 350
-
-    setTimeFrame = Frame(
-        window,
-        height= setTimeFrame_min_height,
-        bg=containerBg,
-    )
-    setTimeFrame.pack(fill=X)
-    setTimeFrame.pack_propagate(FALSE)
-
-    isCheckboxTick = IntVar()
-    setTimeCheckbox = Checkbutton(
-        setTimeFrame,
-        text="Set Time",
-        font=("Times",20),
-        fg="white",
-        command=lambda:animate_setTime(),
-        bg=containerBg,
-        activebackground=containerBg,
-        selectcolor="black",
-        variable= isCheckboxTick,
-        onvalue=1,
-        offvalue= 0
+        content_Frame = Frame(
+            self.window,
+            height=600,
+            width=500,
+            bg=containerBg,
         )
-    setTimeCheckbox.pack()
+        content_Frame.pack(fill=BOTH)
 
-    lbDate = Label(
-        setTimeFrame,
-        text="DATE:",
-        font= ("Times", 15),
-        fg="white",
-        bg=containerBg
-    )
-    lbDate.pack(pady=10)
-
-    
-    date_var = StringVar()  # To store the selected date
-    date_entry = DateEntry(
-        setTimeFrame, 
-        width=30,
-        font= ("Times", 10),
-        textvariable=date_var, 
-        date_pattern='dd/MM/yyyy',
-        showweeknumbers= False,
-        weekendbackground="white",  # Color for weekends
-        weekendforeground="black",
-        othermonthwebackground = "white"
+        lbTitle = Label(
+            content_Frame,
+            text="TITLE:",
+            font=("Times", 15),
+            fg="white",
+            bg=containerBg
         )
-    date_entry.pack()
+        lbTitle.pack(pady=10)
 
-    lbTime = Label(
-        setTimeFrame,
-        text="TIME:",
-        font= ("Times", 15),
-        fg="white",
-        bg=containerBg
-    )
-    lbTime.pack(pady=10)
-
-    time_picker = SpinTimePickerModern(setTimeFrame)
-    time_picker.addAll(constants.HOURS12)
-    time_picker.configureAll(
-        bg="#212121",         
-        height=1, 
-        fg="#ffffff",          
-        font=("Times", 16), 
-        hoverbg="#2e2d2d",     
-        hovercolor="#ffffff",  
-        clickedbg="#404040",   
-        clickedcolor="#d73333",
+        self.inputTitle = Text(
+            content_Frame,
+            bd=0,
+            fg="white",
+            font=("Times", 15),
+            bg=textbg,
+            width=40,
+            height=2,
+            insertbackground="white"
         )
-    time_picker.configure_separator(bg="#212121", fg="#ffffff")
-    time_picker.pack()
+        self.inputTitle.pack()
 
-    lbRecurring = Label(
-        setTimeFrame,
-        text="RECURRING:",
-        font= ("Times", 15),
-        fg="white",
-        bg=containerBg
-    )
-    lbRecurring.pack(pady=10)
+        lbDescription = Label(
+            content_Frame,
+            text="DESCRIPTION:",
+            font=("Times", 15),
+            fg="white",
+            bg=containerBg
+        )
+        lbDescription.pack(pady=10)
 
-    recurrence_type  = ["Don't repeat", "Everyday", "Every week", "Every month", "Every year"]
-    setrecurringCombobox = ttk.Combobox(setTimeFrame, values= recurrence_type,font=("Times", 10),width=30)
-    setrecurringCombobox.set("Don't repeat")
-    setrecurringCombobox.pack()
+        self.inputDescription = Text(
+            content_Frame,
+            bd=0,
+            fg="white",
+            font=("Times", 15),
+            bg=textbg,
+            width=40,
+            height=2,
+            insertbackground="white"
+        )
+        self.inputDescription.pack()
 
-    submitFrame = Frame(
-        window,
-        height= setTimeFrame_min_height,
-        bg=containerBg,
-    )
-    submitFrame.pack(fill=X)
+        self.setTimeFrame_expanded = False
+        self.setTimeFrame_min_height = 50
+        self.setTimeFrame_max_height = 350
 
-    btSubmit = Button(
+        setTimeFrame = Frame(
+            self.window,
+            height=self.setTimeFrame_min_height,
+            bg=containerBg,
+        )
+        setTimeFrame.pack(fill=X)
+        setTimeFrame.pack_propagate(FALSE)
+
+        self.isCheckboxTick = IntVar()
+        setTimeCheckbox = Checkbutton(
+            setTimeFrame,
+            text="Set Time",
+            font=("Times", 20),
+            fg="white",
+            command=lambda: self.animate_setTime(setTimeFrame),
+            bg=containerBg,
+            activebackground=containerBg,
+            selectcolor="black",
+            variable=self.isCheckboxTick,
+            onvalue=1,
+            offvalue=0
+        )
+        setTimeCheckbox.pack()
+
+        lbDate = Label(
+            setTimeFrame,
+            text="DATE:",
+            font=("Times", 15),
+            fg="white",
+            bg=containerBg
+        )
+        lbDate.pack(pady=10)
+
+        self.date_var = StringVar()
+        self.date_entry = DateEntry(
+            setTimeFrame, 
+            width=30,
+            font=("Times", 10),
+            textvariable=self.date_var, 
+            date_pattern='dd/MM/yyyy',
+            showweeknumbers=False,
+            weekendbackground="white",
+            weekendforeground="black",
+            othermonthwebackground="white"
+        )
+        self.date_entry.pack()
+
+        lbTime = Label(
+            setTimeFrame,
+            text="TIME:",
+            font=("Times", 15),
+            fg="white",
+            bg=containerBg
+        )
+        lbTime.pack(pady=10)
+
+        self.time_picker = SpinTimePickerModern(setTimeFrame)
+        self.time_picker.addAll(constants.HOURS12, ["{:02d}".format(i) for i in range(60)])
+        self.time_picker.configureAll(
+            bg="#212121",         
+            height=1, 
+            fg="#ffffff",          
+            font=("Times", 16), 
+            hoverbg="#2e2d2d",     
+            hovercolor="#ffffff",  
+            clickedbg="#404040",   
+            clickedcolor="#d73333",
+        )
+        self.time_picker.configure_separator(bg="#212121", fg="#ffffff")
+        self.time_picker.pack()
+
+        lbRecurring = Label(
+            setTimeFrame,
+            text="RECURRING:",
+            font=("Times", 15),
+            fg="white",
+            bg=containerBg
+        )
+        lbRecurring.pack(pady=10)
+
+        self.recurrence_type = ["Don't repeat", "Everyday", "Every week", "Every month", "Every year"]
+        self.setrecurringCombobox = ttk.Combobox(setTimeFrame, values=self.recurrence_type, font=("Times", 10), width=30)
+        self.setrecurringCombobox.set("Don't repeat")
+        self.setrecurringCombobox.pack()
+
+        submitFrame = Frame(
+            self.window,
+            height=self.setTimeFrame_min_height,
+            bg=containerBg,
+        )
+        submitFrame.pack(fill=X)
+
+        btSubmit = Button(
             submitFrame,
             text="SUBMIT",
-            fg= "BLACK",
-            font=("Times", 12,"bold"),
-            compound= CENTER,
+            fg="BLACK",
+            font=("Times", 12, "bold"),
+            compound=CENTER,
             bg="WHITE",
-            activebackground= containerBg,
+            activebackground=containerBg,
             bd=0,
-            command= lambda: set_notification()
+            command=lambda: self.set_messagebox()
         )
-    btSubmit.pack (side=BOTTOM,pady=10)
+        btSubmit.pack(side=BOTTOM, pady=10)
 
-    def set_notification():
-        title = inputTitle.get("1.0",'end-1c')
-        description = inputDescription.get("1.0",'end-1c')
-        date = date_var.get()
-        selected_time = time_picker.time()
-        recurrence_type = setrecurringCombobox.get()
-        isCheckboxTick_type = isCheckboxTick.get()
-        current_date = datetime.date.today()
-        current_year = current_date.year
-        current_month = current_date.month
-        current_day = current_date.day
-        selected_date = date_entry.get_date()
-        year = selected_date.year
-        month = selected_date.month
-        day = selected_date.day
-        current_hour = int( time.strftime("%H") )
-        current_minute = int (time.strftime("%M") )
-        minute = selected_time [1]
-        if selected_time[2]== "PM":
-            hour = selected_time[0] + 12
+    def set_messagebox(self):
+        self.title = self.inputTitle.get("1.0", 'end-1c')
+        self.description = self.inputDescription.get("1.0", 'end-1c')
+        self.date = self.date_var.get()
+        self.selected_time = self.time_picker.time()
+        self.recurrence_type = self.setrecurringCombobox.get()
+        isCheckboxTick_type = self.isCheckboxTick.get()
+        
+        self.current_date = datetime.date.today()
+        self.current_year = self.current_date.year
+        self.current_month = self.current_date.month 
+        self.current_day = self.current_date.day
+        
+        self.selected_date = self.date_entry.get_date()
+        self.selected_year = self.selected_date.year
+        self.selected_month = self.selected_date.month
+        self.selected_day = self.selected_date.day
+        
+        self.current_hour = int(time.strftime("%H"))
+        self.current_minute = int(time.strftime("%M"))
+        self.current_sec = int(time.strftime("%S"))
+        
+        self.selected_minute = self.selected_time[1]
+        
+        if self.selected_time[2]== "PM":
+            self.selected_hour = self.selected_time[0] + 12
+        elif  self.selected_time[2]== "AM" and self.selected_time[0] == 12:
+            self.selected_hour = 0
+        elif  self.selected_time[2]== "PM" and self.selected_time[0] == 12:
+            self. selected_hour = 12
         else:
-            hour = selected_time[0]
-
-        print (current_hour, current_minute)
-
-        if year < current_year or (year == current_year and month < current_month) or (year == current_year and month == current_month and day < current_day):
+            self.selected_hour = self.selected_time[0]
+        
+        if self.selected_year < self.current_year or (self.selected_year == self.current_year and self.selected_month < self.current_month) or (self.selected_year == self.current_year and self.selected_month == self.current_month and self.selected_day < self.current_day):
             messagebox.showerror("Alert", "You must enter a valid date!")
-        elif selected_date == current_date and (hour < current_hour or minute < current_minute):
+        elif (self.selected_date == self.current_date and self.selected_hour < self.current_hour) or (self.selected_date == self.current_date and self.selected_hour == self.current_hour and self.selected_minute < self.current_minute) :
             messagebox.showerror("Alert", "You must enter a valid time!")
-        elif title.strip() == "" or description.strip() == "":
+        elif self.title.strip() == "" or self.description.strip() == "":
             messagebox.showerror("Alert", "All fields are required!")
-        elif not isCheckboxTick_type:  # Assumes 0 is False and 1 is True for the checkbox
+        elif not isCheckboxTick_type:
             messagebox.showerror("Alert", "Set time is required!")
         else:
             response = messagebox.askyesno("Notifier Set", "Set notification?")
-            if response:  # User clicks "Yes"
-                savedata(title=title,description=description,date=date,selected_time=selected_time,recurrence_type=recurrence_type)
-                window.destroy()
-                # time.sleep(min_to_sec)
+            if response:
+                self.selected_sec = int(time.strftime("%S"))
+                self.savedata()
+                self.recurring()
+                self.window.destroy()
+                self.set_notification()
+
+    def set_notification(self):
+        self.update_datetime()
+        self.update_file() 
+        self.set_checktime()
+        
+        for i in range(self.reminderArrRow):
+            if (self.reminderArr[i][2] == self.current_date_updated and self.reminderArr[i][3] == self.current_time_updated):
                 notification.notify(
-                    title=title,
-                    message=description,
+                    title=self.reminderArr[i][0],
+                    message=self.reminderArr[i][1],
                     app_name="Notifier", 
                     app_icon="icon/ico.ico",
                     toast=True,
                     timeout=10
-                    )
+                )
+        
+        self.window.after(self.checktime, self.set_notification)
+
+    def set_checktime(self):
+        for i in range(self.reminderArrRow):
+            sec = int(self.reminderArr[i][4])
+            parts = self.reminderArr[i][3].split(":")
+            second_parts = parts[1].split(" ")
+
+            if  second_parts[1]== "PM" and parts[0] == "12":
+                selected_hour = 12
+            elif  second_parts[1]== "AM" and parts[0] == "12":
+                selected_hour = 0
+            elif second_parts[1]== "PM" and parts[0] != "12":
+                selected_hour = int(parts[0]) + 12
+            else:
+                selected_hour = int(parts[0])
             
-    def savedata(title,description,date,selected_time,recurrence_type):
+            selected_minute = int(second_parts[0])
+                
+            selected_sec = (selected_hour * 3600) + (selected_minute * 60) + sec
+            current_sec = (self.current_hour * 3600) + (self.current_minute * 60) + self.current_sec
+            self.checktime = (selected_sec - current_sec) * 1000
+
+    def update_file(self):
+        self.reminderArr = []
+        with open("Reminder_Data_Record.txt", 'r') as file:
+            arr = [None for _ in range(6)]
+            lines = file.readlines()    
+            i = 0
+        
+            for line in lines:
+                parts = line.strip("\n").split("|")
+                if len(parts) == 2:
+                    key = parts[0].strip()
+                    value = parts[1].strip()
+                    if key == "TITLE":
+                        arr[0] = value
+                    elif key == "DESCRIPTION":
+                        arr[1] = value 
+                    elif key == "DATE":
+                        arr[2] = value
+                    elif key == "TIME":
+                        arr[3] = value
+                    elif key == "SEC":
+                        arr[4] = value
+                    else:
+                        arr[5] = value
+                    i += 1
+                    if i == 6:
+                        i = 0
+                        self.reminderArr.append(arr)
+                        arr = [None] * 6
+
+    def update_datetime(self):
+        self.current_time_updated = time.strftime("%I:%M %p")
+        self.current_date_updated = datetime.date.today().strftime("%d/%m/%Y")
+        self.window.after(1000, self.update_datetime)
+    
+    def savedata(self):
         if not os.path.exists("Reminder_Data_Record.txt"):
             with open("Reminder_Data_Record.txt",'w') as file:
                 file.write("")
 
-        data = f"TITLE: {title} \nDESCRIPTION: {description} \nDATE: {date} \nTIME: {"{}:{} {}".format(*selected_time)} \nRECURRENCE TYPE: {recurrence_type}\n"
+        data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nSEC | {self.selected_sec} \nRECURRENCE TYPE | {self.recurrence_type}\n\n"
         with open("Reminder_Data_Record.txt", 'a') as file:
             file.write(data)
         file.close()
-        
 
-    def animate_setTime():
-        if not ReminderApp.setTimeFrame_expanded:
-            # Expand sidebar
-            for height in range(setTimeFrame_min_height, setTimeFrame_max_height + 1, 10):
+    def recurring(self):
+        self.update_file()
+        self.reminderArrRow = len(self.reminderArr)
+
+        for i in range(self.reminderArrRow):
+            current_reminder_date = datetime.datetime.strptime(self.reminderArr[i][2], "%d/%m/%Y").date()
+            if  current_reminder_date <=  self.current_date  and self.reminderArr[i][5] != "Don't repeat":
+                self.recurrence_title = self.reminderArr[i][0]
+                self.recurrence_description = self.reminderArr[i][1]
+                self.recurrence_time = self.reminderArr[i][3]
+                self.recurrence_selected_sec = 0
+                self.recurrence_recurrence_type = self.reminderArr[i][5]
+
+                if self.reminderArr[i][5] == "Every year":
+                    self.recurrence_date = current_reminder_date.replace(year=current_reminder_date.year + 1)
+                elif self.reminderArr[i][5] == "Every month":
+                    self.recurrence_date = current_reminder_date.replace(month=current_reminder_date.month + 1)
+                elif self.reminderArr[i][5] == "Every week":
+                    self.recurrence_date = current_reminder_date.replace(week=current_reminder_date.day + 7)
+                else:
+                    self.recurrence_date = current_reminder_date.replace(week=current_reminder_date.day + 1)
+
+            info = f"TITLE | {self.recurrence_title} \nDESCRIPTION | {self.recurrence_description} \nDATE | {self.recurrence_date.strftime('%d/%m/%Y')} \nTIME | {self.recurrence_time} \nSEC | {self.recurrence_selected_sec} \nRECURRENCE TYPE | {self.recurrence_recurrence_type}\n\n"
+            with open("Reminder_Data_Record.txt", 'a') as file:
+                file.write(info)
+            file.close()
+
+    def animate_setTime(self, setTimeFrame):
+        if not self.setTimeFrame_expanded:
+            for height in range(self.setTimeFrame_min_height, self.setTimeFrame_max_height + 1, 10):
                 setTimeFrame.config(height=height)
-                window.update()
-            ReminderApp.setTimeFrame_expanded = True
+                self.window.update()
+            self.setTimeFrame_expanded = True
         else:
-            # Collapse sidebar
-            for height in range(setTimeFrame_max_height,setTimeFrame_min_height - 1, -10):
+            for height in range(self.setTimeFrame_max_height, self.setTimeFrame_min_height - 1, -10):
                 setTimeFrame.config(height=height)
-                window.update()
-            ReminderApp.setTimeFrame_expanded = False
-    
-    window.mainloop()
+                self.window.update()
+            self.setTimeFrame_expanded = False
 
-def clearFrame(container):
-    for widget in container.winfo_children():
-        widget.destroy()
-
-
-def reminder():
+def reminder(): 
     app = ReminderApp()
     app.run()
 
 if __name__ == "__main__":
     reminder()
-
+    
 

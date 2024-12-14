@@ -163,10 +163,10 @@ class MainMenu:
             bg=sidebarBg,
             bd=0,
             activebackground=sidebarBg,
-            command=lambda: [self.switch_indication(self.reminder_btn_indicator),ReminderApp.reminderApp(self.content_frame, self.window)]
+            command=lambda: [self.switch_indication(self.reminder_btn_indicator),ReminderApp(container = self.content_frame)]
         )
         btReminder.place(x=15, y= 202)
-
+        
         self.note_btn_indicator = Label(
             self.sidebar,
             bg=sidebarBg
