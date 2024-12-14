@@ -1,0 +1,4 @@
+Cash: 1000.00
+E-wallet: 6000.00
+Debit Card: 5000.00
+Bank: 6000.00

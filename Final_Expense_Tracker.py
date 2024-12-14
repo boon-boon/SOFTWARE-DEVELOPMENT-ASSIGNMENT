@@ -5,8 +5,9 @@ import os
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from tkcalendar import Calendar
+from tkcalendar import DateEntry
 from datetime import datetime
-from tkinter import Toplevel, Label
+from tkinter import Toplevel, Label, messagebox
 import time
 
 class Expense_Tracker:
@@ -56,13 +57,13 @@ class Expense_Tracker:
         self.sidebar_Frame = sidebar
         self.window = container
 
+        self.Clear_Sidebar()
+        self.Sidebar()
         self.Create_Center_Content()
 
 #--------------------------------------------------------------
     def Create_Center_Content(self):
         
-        self.Clear_Sidebar()
-        self.Sidebar()
         self.Clear_Frame()
         self.Check_Data()
         self.Load_Expense_And_Income()
@@ -164,43 +165,53 @@ class Expense_Tracker:
         
         self.style.configure(
             "Custom.Treeview",
-            background=self.bar_chart_bg,      # Row background color
-            fieldbackground=self.SIDEBAR_COLOR, # Empty space background
-            foreground="white",          # Row text color
+            background=self.bar_chart_bg,      
+            fieldbackground=self.SIDEBAR_COLOR, 
+            foreground="white",          
             font=('Arial', 13)
         )
 
         # Style for Treeview headers
         self.style.configure(
             "Custom.Treeview.Heading",
-            background=self.SIDEBAR_COLOR,   # Header background color
-            foreground='white',         # Header text color
-            font=('Arial', 14, 'bold'), # Font for header text
+            background=self.SIDEBAR_COLOR,   
+            foreground='white',         
+            font=('Arial', 14, 'bold'), 
         )
         
         self.tree = ttk.Treeview(
             print_exp_history_frame,
             style="Custom.Treeview",
-            columns = ('Date', 'Amount', 'Category', 'Description'),
+            columns = ('Date', 'Amount', 'Account', 'Category', 'Description'),
             show = 'headings',
         )
         
         self.tree.heading('Date', text='Date')
         self.tree.heading('Amount', text='Amount')
+        self.tree.heading('Account', text='Account')
         self.tree.heading('Category', text='Category')
         self.tree.heading('Description', text='Description')
         
-        self.tree.column('Date', anchor=CENTER, width=120)
-        self.tree.column('Amount', anchor=CENTER, width=150)
-        self.tree.column('Category', anchor=CENTER, width=200)
-        self.tree.column('Description', anchor=CENTER, width=200)
-        
+        self.tree.column('Date', anchor=CENTER, width=25)
+        self.tree.column('Amount', anchor=CENTER, width=30)
+        self.tree.column('Account', anchor=CENTER, width=5)
+        self.tree.column('Category', anchor=CENTER, width=75)
+        self.tree.column('Description', anchor=CENTER, width=150)
         self.tree.pack(expand=True, fill=BOTH)
         
+        #Add scrollbar and define the mouse
         self.v_scroll = ttk.Scrollbar(self.Middle_Frame,orient=VERTICAL,command=self.tree.yview)
         self.tree.bind("<MouseWheel>", self.Mouse_Scroll)
         
         self.load_data_into_tree()
+        
+        #Add right click menu to edit and delete
+        self.rg_Click_Menu = Menu(self.Middle_Frame,tearoff=0)
+        self.rg_Click_Menu.add_command(label="Edit", command=self.Edit_Data)
+        self.rg_Click_Menu.add_command(label="Delete", command=self.Delete_Data)
+        
+        #Bind the right click with a funcion to print edit and delete
+        self.tree.bind("<Button-3>", self.Right_Click)  
         
         #Print pie chart for expense
         z = 0
@@ -213,7 +224,6 @@ class Expense_Tracker:
         
         self.top5_high_exp[4] = sum(self.top5_low_exp)
         self.top5_high_exp_type[4] = 'Other'
-        
         
         fig = Figure(figsize=(5,5), dpi=110)
         fig.patch.set_facecolor(self.SIDEBAR_COLOR)
@@ -233,6 +243,7 @@ class Expense_Tracker:
         
         print_Top5_Exp = Label(self.Middle_Frame,text="Top 5 Expense", font=self.FONT_BIG, bg=self.SIDEBAR_COLOR,fg='white')
         print_Top5_Exp.place(x=1080,y=190)
+
 
 #--------------------------------------------------------------
     def Add_New_Bill(self):
@@ -269,7 +280,6 @@ class Expense_Tracker:
                 height=125,
                 borderwidth=0,
                 )
-            
             expense_button.image=self.img
             if i > 3:
                 expense_button.place(x=10+(j*350),y=150)
@@ -321,12 +331,12 @@ class Expense_Tracker:
 
         #Create date to input date
         calendar = Calendar(self.Middle_Frame,
-                            background=self.SIDEBAR_COLOR,  # Background color of the calendar
-                            foreground="white",  # Text color
-                            bordercolor=self.SIDEBAR_COLOR,  # Border color of the calendar
-                            headersbackground=self.SIDEBAR_COLOR,  # Background color of the headers (month, day names)
-                            headersforeground="white",  # Text color of the headers
-                            weekendbackground=self.SIDEBAR_COLOR,  # Color for weekends
+                            background=self.SIDEBAR_COLOR,  
+                            foreground="white",  
+                            bordercolor=self.SIDEBAR_COLOR,  
+                            headersbackground=self.SIDEBAR_COLOR,  
+                            headersforeground="white",  
+                            weekendbackground=self.SIDEBAR_COLOR,  
                             weekendforeground="white",
                             normalbackground= self.SIDEBAR_COLOR,
                             normalforeground='white',
@@ -505,7 +515,8 @@ class Expense_Tracker:
             widget.config(fg='white')
     
     
-#--------------------------------------------------------------    
+#--------------------------------------------------------------
+    #Use to initialize word(0.00)at the entry of money    
     def Saving_Money_Entry_Clear(self,event):
         widget = event.widget
         if widget.get() == "0.00":
@@ -565,7 +576,9 @@ class Expense_Tracker:
     def Clear_Middle_Frame(self):
         for widget in self.Middle_Frame.winfo_children():
             widget.destroy()
-            
+        
+        # After press into the new bill and quit it the button need to reset
+        # Otherwise the button won't be highlighted anymore
         self.ACTIVE_BUTTON1 = None
         self.ACTIVE_BUTTON2 = None
 
@@ -638,7 +651,7 @@ class Expense_Tracker:
             self.ACTIVE_BUTTON1.config(bg=self.BG_COLOR)
         new_Button1.config(bg="#454545") 
         self.ACTIVE_BUTTON1 = new_Button1
-    
+
     
 #--------------------------------------------------------------    
     def Highlight_Button2(self,new_Button2):
@@ -654,8 +667,9 @@ class Expense_Tracker:
         self.top5_high_exp = [0.00,0.00,0.00,0.00,0.00]
         self.top5_low_exp = [0.00,0.00,0.00,0.00]
         self.total_Expense = 0
+
         with open(self.N_Expense_File,'r') as file:
-            lines = file.readlines()       
+            lines = file.readlines()
 
         for line in lines:
             parts = line.split(":")
@@ -719,47 +733,38 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def load_data_into_tree(self):
-    # Clear existing rows in the Treeview
         for row in self.tree.get_children():
             self.tree.delete(row)
 
-        # Read data from the file and populate the Treeview
         data = []
         with open(self.N_Expense_History_File, 'r') as file:
             record = {}
             for line in file:
-                line = line.strip()  # Remove leading/trailing whitespace
-                if not line:  # If the line is empty, treat it as the end of a record
-                    if record:  # If we have a complete record, add it to the list
-                        try:
-                            date = record.get("Date", "")
-                            amount = record.get("Amount", "")
-                            category = record.get("Category", "")
-                            description = record.get("Description", "")
-                            data.append({
-                                "Date": date,
-                                "Amount": amount,
-                                "Category": category,
-                                "Description": description
-                            })
-                        except KeyError as e:
-                            print(f"Skipping record due to missing field: {e}")
-                        record = {}  # Reset the record dictionary for the next entry
+                line = line.strip()  
+                if not line:  
+                    if record:  
+                        date = record.get("Date", "")
+                        amount = record.get("Amount", "")
+                        account = record.get("Account", "")
+                        category = record.get("Category", "")
+                        description = record.get("Description", "")
+                        data.append({
+                            "Date": date,
+                            "Amount": amount,
+                            "Account": account,
+                            "Category": category,
+                            "Description": description,
+                        })
+                        record = {}  
                 else:
-                    # Parse the line into key-value pairs
                     if ": " in line:
                         key, value = line.split(": ", 1)
                         record[key] = value
 
-        # Sort the data by Date in ascending order
-        try:
-            data.sort(key=lambda x: datetime.strptime(x["Date"], "%d/%m/%Y"),reverse=True)
-        except ValueError as e:
-            print(f"Error parsing dates: {e}")
-        
-        # Insert the sorted data into the Treeview
+        data.sort(key=lambda x: datetime.strptime(x["Date"], "%d/%m/%Y"),reverse=True)
+
         for record in data:
-            self.tree.insert('', END, values=(record["Date"], record["Amount"], record["Category"], record["Description"]))
+            self.tree.insert('', END, values=(record["Date"], record["Amount"], record["Account"], record["Category"], record["Description"]))
 
 #--------------------------------------------------------------
     #Store the category and account
@@ -774,8 +779,9 @@ class Expense_Tracker:
     #Store the description, amount and date
     def Store_Assets2(self,description=None, amount=None, date=None,category=None):
         #Debug
-        if amount.isdigit() == 0 or self.ACTIVE_BUTTON1 == None or self.ACTIVE_BUTTON2 == None:
+        if amount.isalpha() == 1 or self.ACTIVE_BUTTON1 == None or self.ACTIVE_BUTTON2 == None:
             self.Invalid_Input()
+            return
 
         #If no descripiton than print nothings into notepad
         if description != 'Description':
@@ -783,21 +789,22 @@ class Expense_Tracker:
         else:
             self.assetsLst[2] = f"Description: "
         
-        # if category == 'Expense':    
-        #     different_acc = self.assetsLst[4].split(":")[1].strip()
-        #     if different_acc == 'Cash':
-        #         differentiate_acc = 0
-        #     elif different_acc == 'E-wallet':
-        #         differentiate_acc = 1
-        #     elif different_acc == 'Debit card':
-        #         differentiate_acc = 2
-        #     elif different_acc == 'Bank':
-        #         differentiate_acc = 3
+        if category == 'Expense':    
+            different_acc = self.assetsLst[4].split(":")[1].strip()
+            if different_acc == 'Cash':
+                differentiate_acc = 0
+            elif different_acc == 'E-wallet':
+                differentiate_acc = 1
+            elif different_acc == 'Debit card':
+                differentiate_acc = 2
+            elif different_acc == 'Bank':
+                differentiate_acc = 3
             
-        #     if self.income_Amount[differentiate_acc] > float(amount):
-        #         self.assetsLst[3] = f"Amount: {amount} "
-        #     else:
-        #         self.Invalid_Input()
+            if self.income_Amount[differentiate_acc] > float(amount):
+                self.assetsLst[3] = f"Amount: {amount} "
+            else:
+                messagebox.showerror("Invalid Input", "You don't have enough assets")
+                return
         
         self.assetsLst[3] = f"Amount: {amount} "
         self.assetsLst[0] = f"Date: {date} "
@@ -821,7 +828,6 @@ class Expense_Tracker:
         elif different_acc == 'Bank':
             self.income_Amount[3] += formula * amount
         
-        self.assetsLst[4] = ''
         if category =='Income':
             with open(self.N_Income_History_File, 'a') as file:
                 for item in self.assetsLst:
@@ -845,12 +851,31 @@ class Expense_Tracker:
             self.expense_Amount[expense_Category_No] += amount
             
             data = f"Food: {self.expense_Amount[0]:.2f}\nTransport: {self.expense_Amount[1]:.2f}\nDaily: {self.expense_Amount[2]:.2f}\nHousing: {self.expense_Amount[3]:.2f}\nUtilities: {self.expense_Amount[4]:.2f}\nEducation: {self.expense_Amount[5]:.2f}\nEntertaiment: {self.expense_Amount[6]:.2f}\nOther: {self.expense_Amount[7]:.2f}"
-            
+        
             with open(self.N_Expense_File, 'w')as file:
                 file.write(data)
             file.close()
         
         self.Create_Center_Content()
+
+
+#--------------------------------------------------------------
+    def Save_Income_Account(self):
+        data = f"Cash: {self.income_Amount[0]:.2f}\nE-wallet: {self.income_Amount[1]:.2f}\nDebit Card: {self.income_Amount[2]:.2f}\nBank: {self.income_Amount[3]:.2f}"
+        
+        with open(self.N_Assets_File, 'w') as file:
+            file.write(data)
+        file.close()
+
+
+#--------------------------------------------------------------
+    def Save_Expense_Account(self):
+        data = f"Food: {self.expense_Amount[0]:.2f}\nTransport: {self.expense_Amount[1]:.2f}\nDaily: {self.expense_Amount[2]:.2f}\nHousing: {self.expense_Amount[3]:.2f}\nUtilities: {self.expense_Amount[4]:.2f}\nEducation: {self.expense_Amount[5]:.2f}\nEntertaiment: {self.expense_Amount[6]:.2f}\nOther: {self.expense_Amount[7]:.2f}"
+        
+        with open(self.N_Expense_File, 'w')as file:
+            file.write(data)
+        file.close()
+    
 
 #--------------------------------------------------------------
     def Animate_Bar_Chart(self, frame,min,max): 
@@ -861,54 +886,195 @@ class Expense_Tracker:
 
 
 #--------------------------------------------------------------
-    def load_data_into_tree(self):
-    # Clear existing rows in the Treeview
-        for row in self.tree.get_children():
-            self.tree.delete(row)
-
-        # Read data from the file and populate the Treeview
-        data = []
-        with open(self.N_Expense_History_File, 'r') as file:
-            record = {}
-            for line in file:
-                line = line.strip()  # Remove leading/trailing whitespace
-                if not line:  # If the line is empty, treat it as the end of a record
-                    if record:  # If we have a complete record, add it to the list
-                        try:
-                            date = record.get("Date", "")
-                            amount = record.get("Amount", "")
-                            category = record.get("Category", "")
-                            description = record.get("Description", "")
-                            data.append({
-                                "Date": date,
-                                "Amount": amount,
-                                "Category": category,
-                                "Description": description
-                            })
-                        except KeyError as e:
-                            print(f"Skipping record due to missing field: {e}")
-                        record = {}  # Reset the record dictionary for the next entry
-                else:
-                    # Parse the line into key-value pairs
-                    if ": " in line:
-                        key, value = line.split(": ", 1)
-                        record[key] = value
-
-        # Sort the data by Date in ascending order
-        try:
-            data.sort(key=lambda x: datetime.strptime(x["Date"], "%d/%m/%Y"),reverse=True)
-        except ValueError as e:
-            print(f"Error parsing dates: {e}")
-        
-        # Insert the sorted data into the Treeview
-        for record in data:
-            self.tree.insert('', END, values=(record["Date"], record["Amount"], record["Category"], record["Description"]))
-            
-
-#--------------------------------------------------------------
     def Mouse_Scroll(self,event):
         self.tree.yview_scroll((event.delta // 120), "units")
 
+
+#--------------------------------------------------------------
+    def Right_Click(self,event):
+        row_Id = self.tree.identify_row(event.y)
+        if row_Id:
+            self.tree.selection_set(row_Id)
+            self.rg_Click_Menu.post(event.x_root, event.y_root)
+
+#--------------------------------------------------------------
+    def Edit_Data(self):
+        self.selected_Data = self.tree.selection()
+        
+        values = self.tree.item(self.selected_Data, "values")
+        
+        self.Open_Edit_Window(values)
+
+
+#--------------------------------------------------------------
+    def Open_Edit_Window(self, values):
+        Edit_Window = Toplevel(self.window)
+        Edit_Window.title("Edit data")
+        
+        # Use to print the date and edit the date
+        prt_Date = Label(Edit_Window, text="Date (DD/MM/YYYY): ")
+        prt_Date.grid(row=0,column=0,padx=10,pady=5)
+        date_Entry = DateEntry(Edit_Window, width=20, state="readonly", date_pattern="dd/mm/yyyy")
+        date_Entry.delete(0,"end")
+        date_Entry.insert(0, values[0])
+        date_Entry.grid(row=0,column=1,padx=10,pady=5)
+        
+        # Use to print the amount and edit the amount
+        prt_Amount = Label(Edit_Window, text="Amount: ")
+        prt_Amount.grid(row=1,column=0,padx=10,pady=5)
+        amount_Entry = Entry(Edit_Window, width=22)
+        amount_Entry.insert(0, values[1])
+        amount_Entry.grid(row=1,column=1,padx=10,pady=5)
+        
+        prt_Acc = Label(Edit_Window, text="Account")
+        prt_Acc.grid(row=2,column=0, padx=10, pady=5)
+        acc_Entry = ttk.Combobox(Edit_Window, values=self.account_Type, state="readonly")
+        acc_Entry.set(values[2])
+        acc_Entry.grid(row=2,column=1, padx=10,pady=5)
+        
+        # Use to print the category and the 
+        prt_Category = Label(Edit_Window, text="Category: ")
+        prt_Category.grid(row=3,column=0,padx=10,pady=5)
+        category_Entry = ttk.Combobox(Edit_Window, values=self.expense_Category, state="readonly")
+        category_Entry.set(values[3])
+        category_Entry.grid(row=3,column=1,padx=10,pady=5)
+        
+        # Use to print the description and let user to edit
+        prt_Description = Label(Edit_Window, text="Description: ")
+        prt_Description.grid(row=4,column=0,padx=10,pady=5)
+        description_Entry = Entry(Edit_Window, width=22)
+        description_Entry.insert(0, values[4])
+        description_Entry.grid(row=4,column=1,padx=10,pady=5)
+
+        # Print save button to store 
+        save_Button = Button(Edit_Window, text="Save",
+                             command=lambda: self.Store_Editted_Data(date_Entry.get(),
+                                                                     amount_Entry.get(),
+                                                                     acc_Entry.get(),
+                                                                     category_Entry.get(),
+                                                                     description_Entry.get(),
+                                                                     Edit_Window,
+                                                                     values))
+        save_Button.grid(row=5,column=0,columnspan=2,pady=20)
+
+
+#--------------------------------------------------------------
+    def Store_Editted_Data(self, date, amount, account, category, description, edit_window, original_values):
+    # Validate amount input
+        
+        if amount.isalpha == 1:
+            messagebox.showerror("Invalid Input", "Please input number only")
+     
+        self.tree.item(self.selected_Data, values=(date, amount, account, category, description))
+        
+        amount = float(amount)
+        original_Exp_Amount = float(original_values[1])
+        original_Account = original_values[2]
+        original_Category = original_values[3]
+        
+        if account == original_Account:
+            # If category remains the same
+            if category == original_Category:
+                # Adjust account balance based on amount change
+                account_No = self.account_Type.index(account)
+                expense_no = self.expense_Category.index(category)
+                
+                # If new amount is higher
+                if amount > original_Exp_Amount:
+                    difference_exp = amount - original_Exp_Amount
+                    
+                    # Check if enough balance exists
+                    if self.income_Amount[account_No] >= difference_exp:
+                        self.income_Amount[account_No] -= difference_exp
+                        self.expense_Amount[expense_no] += difference_exp
+                    else:
+                        messagebox.showerror("Invalid Input", "You don't have enough assets")
+                        return
+                
+                # If new amount is lower
+                elif amount < original_Exp_Amount:
+                    difference_exp = original_Exp_Amount - amount
+                    self.income_Amount[account_No] += difference_exp
+                    self.expense_Amount[expense_no] -= difference_exp
+            
+            # If category changes
+            else:
+                # Remove amount from original category
+                original_expense_No = self.expense_Category.index(original_Category)
+                self.expense_Amount[original_expense_No] -= original_Exp_Amount
+                
+                # Add amount to new category
+                new_expense_No = self.expense_Category.index(category)
+                self.expense_Amount[new_expense_No] += amount
+        
+        # If account changes
+        else:
+            # Remove from original account and category
+            original_account_No = self.account_Type.index(original_Account)
+            original_expense_No = self.expense_Category.index(original_Category)
+            
+            # Check if new account has enough balance
+            new_account_No = self.account_Type.index(account)
+            if self.income_Amount[new_account_No] >= amount:
+                # Adjust original account
+                self.income_Amount[original_account_No] += original_Exp_Amount
+                
+                # Adjust new account
+                self.income_Amount[new_account_No] -= amount
+                
+                # Adjust categories
+                self.expense_Amount[original_expense_No] -= original_Exp_Amount
+                
+                # Add to new category if different
+                if category != original_Category:
+                    new_expense_No = self.expense_Category.index(category)
+                    self.expense_Amount[new_expense_No] += amount
+                else:
+                    self.expense_Amount[original_expense_No] += amount
+            else:
+                messagebox.showerror("Invalid Input", "Insufficient balance in the selected account")
+                return
+            
+        # Save updated accounts
+        self.Save_Income_Account()
+        self.Save_Expense_Account()
+        self.Update_Expense_History()
+        #Close the edit window
+        edit_window.destroy()
+
+
+#--------------------------------------------------------------
+    def Delete_Data(self):
+        selected_Data = self.tree.selection()
+        
+        values = self.tree.item(selected_Data, "values")
+        
+        self.tree.delete(selected_Data)
+        
+        amount = float(values[1])
+        account = values[2]
+        expense = values[3]
+        account_No = self.account_Type.index(account)
+        expense_No = self.expense_Category.index(expense)
+        self.income_Amount[account_No] += amount
+        self.expense_Amount[expense_No] -= amount
+        
+        self.Save_Income_Account()
+        self.Save_Expense_Account()
+        self.Update_Expense_History()
+
+#--------------------------------------------------------------
+    def Update_Expense_History(self):
+        rows = self.tree.get_children()
+        data=[]
+        for row in rows:
+            data.append(self.tree.item(row, "values"))
+        
+        with open(self.N_Expense_History_File, 'w') as file:
+            for record in data:
+                file.write(f"Date: {record[0]}\nCategory: {record[3]}\nDescription: {record[4]}\nAmount: {record[1]}\nAccount: {record[2]}\n\n")
+        
+        self.Create_Center_Content()
 
 #--------------------------------------------------------------
     def Invalid_Input(self):
@@ -921,14 +1087,11 @@ class Expense_Tracker:
         error_window.mainloop()
         
         
-        
 #--------------------------------------------------------------
     def Sidebar(self):
         self.dsd = Frame(self.sidebar_Frame, bg='#2f3336',height=1080,width=250)
         self.dsd.pack()
         self.dsd.pack_propagate()
-        
-        
         
         main_Section = [
             ("Home", "🏠"),
@@ -990,7 +1153,6 @@ class Expense_Tracker:
         assets_Page_Navigator.grid(row=0,column=0)
         print_Assets = Label(assets_Page_Navigator,text="Assets",fg="white",bg=self.SIDEBAR_COLOR,font=self.FONT_BIG)
         print_Assets.place(x=675,y=15)
-        
 
         self.Load_Image("Expense_Tracker_Photo/Black_Rectangle1.png",1425,130)
         assests_Page_Top_Frame_Rectangle = Label(self.Middle_Frame,image=self.img,bg=self.BG_COLOR)
@@ -1010,7 +1172,8 @@ class Expense_Tracker:
         ttl_inc_frm = Frame(self.Middle_Frame, bg=self.SIDEBAR_COLOR, width=100,height=50)
         ttl_inc_frm.place(x=655,y=130)
         
-        ttl_inc_amt = Label(ttl_inc_frm, text=f"{self.Total_Assets:.2f}",
+        ttl_inc_amt = Label(ttl_inc_frm, 
+                            text=f"{self.Total_Assets:.2f}",
                             bg=self.SIDEBAR_COLOR,
                             fg='white',
                             font=("Cardium",24,"bold")
@@ -1046,7 +1209,7 @@ class Expense_Tracker:
             print_Account_Balance = Label(frame_Print_Acc_Balance,text=f"{self.income_Amount[i]:.2f}",bg=self.SIDEBAR_COLOR,fg='white',font=self.FONT_BIG)
             print_Account_Balance.grid(row=i,column=0,pady=36,padx=50,sticky='e')
 
-         #Print pie chart
+        #Print pie chart
         fig = Figure(figsize=(5, 5), dpi=110)
         fig.patch.set_facecolor(self.SIDEBAR_COLOR)  #Set the colour same with the background colour 
         ax = fig.add_subplot(111)
