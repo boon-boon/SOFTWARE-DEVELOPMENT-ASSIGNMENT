@@ -1,7 +1,11 @@
 from tkinter import *
 from PIL import Image,ImageTk
 from Reminder import ReminderApp
+<<<<<<< HEAD
 
+=======
+from Final_Expense_Tracker import Expense_Tracker
+>>>>>>> 5c7742f9989f028a298340d1c02f904a0b85e355
 
 
 sidebarBg = "#1a1c1e"       
@@ -43,15 +47,6 @@ class MainMenu:
         self.sidebar.pack(side=LEFT, fill=Y)
         self.sidebar.pack_propagate(False)
 
-        self.secondSidebar = Frame(
-            self.window, 
-            width=self.sidebar_min_width , 
-            bg="#2f3336", 
-            height=1080
-        )
-        self.secondSidebar.pack(side=LEFT, fill=Y)
-        self.secondSidebar.pack_propagate(False)
-
         # Content frame
         self.content_frame = Frame(
             self.window, 
@@ -60,6 +55,16 @@ class MainMenu:
             bg=containerBg
         )
         self.content_frame.pack(side=RIGHT, fill=BOTH)
+        self.content_frame.pack_propagate(False)
+
+        self.secondSidebar = Frame(
+                self.window, 
+                width=self.sidebar_min_width, 
+                bg="#2f3336", 
+                height=1080
+        )
+        self.secondSidebar.place(x=70,y=70)
+        self.secondSidebar.pack_propagate(False)
 
         # Create buttons
         self.create_buttons()
@@ -101,9 +106,8 @@ class MainMenu:
         self.reminder_btn_indicator.config(bg=sidebarBg)
         self.note_btn_indicator.config(bg=sidebarBg)
 
-
         indication_lb.config(bg="white")
-
+        
     def create_sidebar_content(self):
         """Create sidebar menu items"""
         self.home_btn_indicator = Label(
@@ -143,8 +147,8 @@ class MainMenu:
             bg=sidebarBg,
             activebackground=sidebarBg,
             bd=0,
-            command=lambda: [self.switch_indication(self.expense_btn_indicator)]
         )
+        btexpense.config(command=lambda: [self.switch_indication(self.expense_btn_indicator), Expense_Tracker(self.content_frame,self.secondSidebar)])
         btexpense.place(x=15, y= 125)
 
         self.reminder_btn_indicator = Label(
@@ -205,7 +209,7 @@ class MainMenu:
         
     def run(self):
         self.window.mainloop()
-
+        
     def clearFrame(container):
         for widget in container.winfo_children():
             widget.destroy()
