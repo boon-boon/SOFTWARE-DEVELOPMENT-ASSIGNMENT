@@ -103,9 +103,7 @@ class MainMenu:
         self.note_btn_indicator.config(bg=sidebarBg)
 
         indication_lb.config(bg="white")
-        # self.app = app
-        # self.Create_Sidebar_Content()
-
+        
     def create_sidebar_content(self):
         """Create sidebar menu items"""
         self.home_btn_indicator = Label(
