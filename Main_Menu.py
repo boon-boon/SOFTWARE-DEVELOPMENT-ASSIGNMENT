@@ -183,7 +183,7 @@ class MainMenu:
             bg=sidebarBg,
             bd=0,
             activebackground=sidebarBg,
-            command=lambda: [self.switch_indication(self.note_btn_indicator),NotesOrganizer(self.content_frame,self.secondSidebar)]
+            command=lambda: [self.switch_indication(self.note_btn_indicator),]
         )
         btNote.place(x=15, y= 279)
 

@@ -411,5 +411,5 @@ def note():
     app = NotesOrganizer()
     app.run()
 
-if __name__ == "__main__":
-    note()
+# if __name__ == "__main__":
+#     note()
