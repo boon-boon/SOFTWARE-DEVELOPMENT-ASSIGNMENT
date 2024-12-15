@@ -1,11 +1,7 @@
 from tkinter import *
 from PIL import Image,ImageTk
 from Reminder import ReminderApp
-<<<<<<< HEAD
-
-=======
 from Final_Expense_Tracker import Expense_Tracker
->>>>>>> 5c7742f9989f028a298340d1c02f904a0b85e355
 
 
 sidebarBg = "#1a1c1e"       
