@@ -1,688 +1,413 @@
-from tkinter import *
-from tkinter import ttk, StringVar, Toplevel, Frame, Button, Label
-from tkinter.ttk import Style
-from tkinter import Toplevel, Frame, Button, Label, Text, StringVar, END, BOTH
-from tkinter import  filedialog, messagebox
+import tkinter as tk
+from tkinter import ttk, filedialog, colorchooser, messagebox
+from PIL import Image, ImageTk
 from datetime import datetime
-from tkinter import colorchooser, messagebox
 import os
-from tkinter import messagebox, filedialog
-from docx import Document
-from docx.shared import Pt, RGBColor
-from PIL import Image
+import json
 import io
 
 class NotesOrganizer:
-    def __init__(self, container, secondSidebar):
-        container
-        secondSidebar
-        # self.root = root
-        # self.root.title("Notes Organizer")
-        # self.root.geometry("1200x700")
-        # self.root.configure(bg='#212121')  # Dark background
+    def __init__(self, container):
+        self.window = container
 
-        self.root.config(bg='white')
-        
-        # Store the directory where notes will be saved
+        self.Top_sidebar_frame = tk.Frame(container, height=60, bg='#181818')
+        self.Top_sidebar_frame.pack(side="top", fill="x")
 
-        self.notes_directory = os.path.join(os.path.expanduser("~"), "NotesOrganizer")
-        os.makedirs(self.notes_directory, exist_ok=True)
-
-        # Sidebar at the bottom
-        self.B_sidebar = Frame(root, height=50, bg='#181818')  # Use height for bottom bars
-        self.B_sidebar.pack(side=BOTTOM, fill=X)
-
-        self.T_sidebar = Frame(root, height=60, bg='#181818')  # Use height for bottom bars
-        self.T_sidebar.pack(side=TOP, fill=X)
-
-        self.Out_button = Button(
-            self.T_sidebar,
-            text="<",
-            font=('Arial', 25),
-            bg='#181818',
-            fg='white',
-            borderwidth=0,
-            activebackground='#202020',
-            command=self.Out_button_action
-        )
-        self.Out_button.pack(side=LEFT, pady=10, padx=20)
-
-        # Search frame
-        search_frame = Frame(self.T_sidebar, bg='#181818')
-        search_frame.pack(side=LEFT, padx=20, pady=10, expand=True, fill=X)
-
-        self.sidebar = Frame(self.root, 
-                                width=250, 
-                                bg='#181818', 
-                                height=root.winfo_screenheight())
-        self.sidebar_visible = False
-
-        self.ThreeLine_button = Button(
-            self.B_sidebar,
-            text="☰",
-            font=('Arial', 25),
-            bg='#181818',
-            fg='white',
-            borderwidth=0,
-            activebackground='#202020',
-            command=self.ThreeLine_button_action
-        )
-        self.ThreeLine_button.pack(side=LEFT, pady=10, padx=20)
-        
-        # Add button with plus emoji
-        self.add_button = Button(
-            self.B_sidebar, 
-            text="➕", 
-            font=('Arial', 25),  # Adjust font size to make emoji larger
-            bg='#181818',         # Match sidebar background
-            fg='white',           # Text color
-            borderwidth=0,        # Remove button border
-            activebackground='#202020',  # Slight color change when pressed
-            command=self.Addbutton_action  # Add a method to handle button click
-        )
-        self.add_button.pack(side=LEFT, expand=True, anchor=CENTER, pady=10)  # Center the button in sidebar
-
-        self.Search_button = Button(
-            self.B_sidebar,
-            text="🔍",
-            font=('Arial', 30),
-            bg='#181818',
-            fg='white',
-            borderwidth=0,
-            activebackground='#202020',
-            command=self.Search_button_action
-        )
-        self.Search_button.pack(side=RIGHT, pady=10, padx=20)
-
-        # Notes list frame
-        self.notes_frame = Frame(root, bg='#212121')
-        self.notes_frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
-
-        # Treeview for displaying notes
-        self.notes_tree = ttk.Treeview(self.notes_frame, 
-                                       columns=("Filename", "Date", "Category"), 
-                                       show='headings')
-
-        # Customize Treeview style
-        style = ttk.Style()
-        style.theme_use('default')
-        style.configure("Treeview", 
-                        background='#292929',
-                        foreground='white',
-                        rowheight=30,
-                        fieldbackground='#292929')
-        style.configure("Treeview.Heading", 
-                        background='#181818', 
-                        foreground='white', 
-                        font=('Arial', 10, 'bold'))
-        style.map('Treeview', 
-                  background=[('selected', '#404040')],
-                  foreground=[('selected', 'white')])
-
-        # Define column headings
-        self.notes_tree.heading("Filename", text="Filename")
-        self.notes_tree.heading("Date", text="Date")
-        self.notes_tree.heading("Category", text="Category")
-        
-        # Set column widths
-        self.notes_tree.column("Filename", width=400)
-        self.notes_tree.column("Date", width=200)
-        self.notes_tree.column("Category", width=200)
-
-        # Add scrollbar
-        scrollbar = ttk.Scrollbar(self.notes_frame, orient=VERTICAL, command=self.notes_tree.yview)
-        self.notes_tree.configure(yscroll=scrollbar.set)
-
-        # Pack treeview and scrollbar
-        self.notes_tree.pack(side=LEFT, fill=BOTH, expand=True)
-        scrollbar.pack(side=RIGHT, fill=Y)
-
-        # Bind double-click event to open note
-        self.notes_tree.bind('<Double-1>', self.open_selected_note)
-
-        # Load existing notes on startup
-        self.load_notes()
-
-    def load_notes(self):
-        """Load all saved notes into the treeview"""
-        # Clear existing items
-        for i in self.notes_tree.get_children():
-            self.notes_tree.delete(i)
-        
-        # Iterate through .docx files in the notes directory
-        for filename in os.listdir(self.notes_directory):
-            if filename.endswith('.docx'):
-                file_path = os.path.join(self.notes_directory, filename)
-                
-                # Read metadata from the document
-                try:
-                    doc = Document(file_path)
-                    
-                    # Extract category (assuming it's the second paragraph)
-                    category = "Uncategorized"
-                    if len(doc.paragraphs) > 1 and doc.paragraphs[1].text.startswith("Category:"):
-                        category = doc.paragraphs[1].text.replace("Category:", "").strip()
-                    
-                    # Get file modification time
-                    mod_time = os.path.getmtime(file_path)
-                    formatted_date = datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %H:%M')
-                    
-                    # Insert into treeview
-                    self.notes_tree.insert("", END, values=(filename, formatted_date, category))
-                
-                except Exception as e:
-                    print(f"Error reading {filename}: {e}")
-
-    def search_notes(self):
-        """Search notes based on user input"""
-        search_term = self.search_var.get().lower()
-        
-        # Clear current treeview
-        for i in self.notes_tree.get_children():
-            self.notes_tree.delete(i)
-        
-        # Iterate through .docx files in the notes directory
-        for filename in os.listdir(self.notes_directory):
-            if filename.endswith('.docx'):
-                file_path = os.path.join(self.notes_directory, filename)
-                
-                try:
-                    doc = Document(file_path)
-                    
-                    # Check if search term is in any paragraph
-                    match_found = any(
-                        search_term in paragraph.text.lower() 
-                        for paragraph in doc.paragraphs
-                    )
-                    
-                    if match_found or search_term in filename.lower():
-                        # Extract category
-                        category = "Uncategorized"
-                        if len(doc.paragraphs) > 1 and doc.paragraphs[1].text.startswith("Category:"):
-                            category = doc.paragraphs[1].text.replace("Category:", "").strip()
-                        
-                        # Get file modification time
-                        mod_time = os.path.getmtime(file_path)
-                        formatted_date = datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %H:%M')
-                        
-                        # Insert into treeview
-                        self.notes_tree.insert("", END, values=(filename, formatted_date, category))
-                
-                except Exception as e:
-                    print(f"Error searching {filename}: {e}")
-
-    def open_selected_note(self, event):
-        """Open the selected note"""
-        # Get the selected item
-        selected_item = self.notes_tree.selection()
-        
-        if not selected_item:
-            return
-        
-        # Get the filename
-        filename = self.notes_tree.item(selected_item)['values'][0]
-        file_path = os.path.join(self.notes_directory, filename)
-        
-        # Create new note window (reusing the Addbutton_action logic)
-        self.Addbutton_action(file_path)
-
-    def Addbutton_action(self, file_path=None): 
-        def insert_picture():
-            try:
-                # Open file dialog to select an image
-                file_path = filedialog.askopenfilename(
-                    title="Select an image",
-                    filetypes=[
-                        ("Image files", "*.png *.gif"),
-                        ("PNG files", "*.png"),
-                        ("GIF files", "*.gif"),
-                        ("All files", "*.*")
-                    ]
-                )
-                
-                # If a file is selected
-                if file_path:
-                    # Open the image using Tkinter's PhotoImage
-                    photo = PhotoImage(file=file_path)
-                    
-                    # Check if image is too large and scale down if necessary
-                    max_width = 600
-                    if photo.width() > max_width:
-                        # Calculate scaling factor
-                        scale_factor = max_width / photo.width()
-                        
-                        # Scale down the image
-                        scaled_width = int(photo.width() * scale_factor)
-                        scaled_height = int(photo.height() * scale_factor)
-                        
-                        # Use Tkinter's subsample method to resize
-                        photo = photo.subsample(int(1/scale_factor), int(1/scale_factor))
-                    
-                    # Create a label with the image
-                    image_label = Label(Note_text_frame, image=photo, bg='#212121')
-                    image_label.image = photo  # Keep a reference to prevent garbage collection
-                    
-                    # Insert the image into the Note_text_box
-                    Note_text_box.window_create(END, window=image_label)
-                    
-                    # Optional: Insert a newline after the image
-                    Note_text_box.insert(END, "\n")
-
-                    Note_text_box.edit_modified(True)
-                    Note_text_box.edit_separator()
-                    
-                    # Optional: Store the image file path for saving later
-                    image_label.file_path = file_path
-            
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to insert picture: {str(e)}")
-
-        def save_note():
-            try:
-                # Ask user where to save the file
-                save_path = filedialog.asksaveasfilename(
-                    initialdir=self.notes_directory,
-                    defaultextension=".docx",
-                    filetypes=[("Word Document", "*.docx"), ("All files", "*.*")]
-                )
-                
-                if not save_path:
-                    return  # User cancelled save
-                
-                # Create a new Word document
-                doc = Document()
-                
-                # Set default style
-                style = doc.styles['Normal']
-                style.font.name = 'Arial'
-                style.font.size = Pt(12)
-                
-                # Add tags (from text_box)
-                tags_paragraph = doc.add_paragraph()
-                tags_paragraph.add_run("Tags: ").bold = True
-                tags_paragraph.add_run(text_box.get("1.0", END).strip())
-                
-                # Add category if selected
-                if category_var.get() != "Select Category":
-                    doc.add_paragraph(f"Category: {category_var.get()}")
-                
-                # Retrieve content from Note_text_box
-                content = Note_text_box
-                
-                # Paragraph to hold the note content
-                note_paragraph = doc.add_paragraph()
-                
-                # Iterate through the content
-                index = "1.0"
-                while index:
-                    try:
-                        # Get the tag names at this index
-                        tags = content.tag_names(index)
-                        
-                        # Get the text at this index
-                        next_index = content.index(f"{index} lineend")
-                        current_text = content.get(index, next_index)
-                        
-                        # Find color tag (if any)
-                        color_tag = next((tag for tag in tags if tag.startswith('color-')), None)
-                        
-                        # Check if this is an image
-                        window_info = content.window_cget(index, "window")
-                        
-                        if window_info:  # This is an image
-                            # Get the image label
-                            image_label = content.window_cget(index, "window")
-                            
-                            # Try to get the file path of the image
-                            if hasattr(image_label, 'file_path'):
-                                # Open the image using Pillow
-                                with Image.open(image_label.file_path) as img:
-                                    # Save image to a BytesIO object
-                                    img_byte_arr = io.BytesIO()
-                                    img.save(img_byte_arr, format='PNG')
-                                    img_byte_arr = img_byte_arr.getvalue()
-                                    
-                                    # Add image to the document
-                                    doc.add_picture(io.BytesIO(img_byte_arr))
-                        
-                        else:  # This is text
-                            # Add text with color if applicable
-                            run = note_paragraph.add_run(current_text)
-                            
-                            # Apply color if a color tag exists
-                            if color_tag:
-                                # Extract hex color from tag
-                                hex_color = color_tag.split('-')[1]
-                                # Convert hex to RGB
-                                r = int(hex_color[1:3], 16)
-                                g = int(hex_color[3:5], 16)
-                                b = int(hex_color[5:7], 16)
-                                run.font.color.rgb = RGBColor(r, g, b)
-                        
-                        # Move to next index
-                        index = next_index + "+1c"
-                        
-                        # Add a newline after text or image
-                        if current_text.strip() or window_info:
-                            doc.add_paragraph()
-                    
-                    except TclError:
-                        # No more content
-                        break
-                
-                # Save the document
-                doc.save(file_path)
-                
-                # Show success message
-                messagebox.showinfo("Success", f"Note saved successfully to {file_path}")
-            
-                # Reload notes after saving
-                self.load_notes()
-
-            except Exception as e:
-                # Handle any errors during save
-                messagebox.showerror("Error", f"Failed to save note: {str(e)}")
-                    
-        def choose_text_color():
-            # Check if any text is selected in Note_text_box
-            try:
-                # Get the selected text's start and end indexes
-                start = Note_text_box.index(SEL_FIRST)
-                end = Note_text_box.index(SEL_LAST)
-            except TclError:
-                # No text selected
-                messagebox.showinfo("Error", "Please select some text first")
-                return
-
-            # Open color chooser dialog
-            color = colorchooser.askcolor(title="Choose text color")
-            
-            # Check if a color was selected (not cancelled)
-            if color[1]:  # color[1] is the hex color code
-                 # Mark the current state before modification
-                Note_text_box.edit_separator()
-
-                # Store the original color of the selected text
-                original_color = Note_text_box.tag_cget("sel", "foreground")
-                
-                for tag in Note_text_box.tag_names(start):
-                            if tag.startswith('color-'):
-                                Note_text_box.tag_remove(tag, start, end)
-
-                # Create a new color tag
-                tag_name = f"color-{color[1]}"
-                Note_text_box.tag_config(tag_name, foreground=color[1])
-                Note_text_box.tag_add(tag_name, start, end)
-                
-                # Mark as modified to enable undo
-                Note_text_box.edit_modified(True)
-
-        new_note_window=Toplevel(self.root)
-        new_note_window.title("New Note" if file_path is None else "Edit Note")
-        new_note_window.geometry("1200x700")
-        new_note_window.configure(bg='#212121')
-
-        top_sidebar = Frame(new_note_window, height=60, bg='#181818')  # Use height for bottom bars
-        top_sidebar.pack(side=TOP, fill=X)
-
-        left_sidebar_frame = Frame(top_sidebar, bg='#181818')
-        left_sidebar_frame.pack(side=LEFT, fill=Y, padx=10)
-        
-        # Back button with '<' symbol
-        back_button = Button(left_sidebar_frame, 
-                             text="<", 
-                             font=('Arial', 25, 'bold'),
-                             bg='#181818', 
-                             fg='white', 
-                             borderwidth=0,
-                             width=2,
-                             activebackground='#202020',
-                             command=new_note_window.destroy)
-        back_button.pack(side=LEFT, pady=10)
-
-        right_sidebar_frame = Frame(top_sidebar, bg='#181818')
-        right_sidebar_frame.pack(side=RIGHT, fill=Y, padx=10)
-        
-        save_button = Button(right_sidebar_frame, 
-                             text="💾", 
-                             font=('Arial', 25, 'bold'),
-                             bg='#181818', 
-                             fg='white', 
-                             borderwidth=0,
-                             width=2,
-                             activebackground='#202020',
-                             command=lambda: save_note())
-        save_button.pack(side=RIGHT, pady=10)
-
-        horizontal_sidebar =Frame(new_note_window, height=50, bg='#292929')  # Adjust height as needed
-        horizontal_sidebar.pack(side=TOP, fill=X)
-
-        style = Style()
-        style.theme_use('default')  # Use default theme as base
-        
-        # Customize Combobox style
-        style.configure('Custom.TCombobox', 
-                        background='#292929',  # Dark background for dropdown
-                        foreground='white',   # White text
-                        fieldbackground='#292929',  # Background of the selected item field
-                        arrowcolor='white')
-
-        category_label = Label(horizontal_sidebar, 
-                               text="Category:", 
-                               font=('Arial', 12),
-                               bg='#292929', 
-                               fg='white')
-        category_label.pack(side=LEFT, padx=(20,10), pady=10)
-        
-        category_var = StringVar()
-        category_dropdown = ttk.Combobox(horizontal_sidebar, 
-                                         textvariable=category_var,
-                                         values=["Financial Plans", "Investment Opportunities", "Receipts"],
-                                         state="readonly",  # Prevents manual text entry
-                                         width=25)
-        category_dropdown.pack(side=LEFT, padx=10, pady=10)
-        category_dropdown.set("Select Category")
+        label = tk.Label(self.Top_sidebar_frame, text="Note Organizer", bg="#181818", fg="white", font=("Arial Rounded MT Bold", 14))
+        label.pack(pady=5)
     
-        trash_frame = Frame(horizontal_sidebar, bg='#292929')
-        trash_frame.pack(side=RIGHT, padx=10)
+        self.Bottom_sidebar_frame = tk.Frame(container, height=60, bg="#181818")
+        self.Bottom_sidebar_frame.pack(side="bottom", fill="x")
+
+        self.Search_button = tk.Button(
+            self.Bottom_sidebar_frame,
+            text="🔍",
+            font=(25),
+            bg="#181818",
+            fg="white",
+            borderwidth=0,
+            activebackground="#202020"
+        )
+        self.Search_button.pack(side="right", pady=10, padx=10)
+
+        self.Add_button = tk.Button(
+            self.Bottom_sidebar_frame,
+            text="➕",
+            font=(25),
+            bg="#181818",
+            fg="white",
+            activebackground="#202020",
+            borderwidth=0,
+            command=self.Add_button_function
+        )
+        self.Add_button.pack(side="left", expand=True, anchor="center", pady=10)
+
         
-        trash_button = Button(trash_frame, 
-                          text="🗑️", 
-                          font=('Arial', 20),
-                          bg='#292929', 
-                          fg='white', 
-                          borderwidth=0,
-                          activebackground='#252525')
-        trash_button.pack(side=RIGHT, padx=5, pady=5)
 
-        right_buttons_frame = Frame(horizontal_sidebar, bg='#292929')
-        right_buttons_frame.pack(side=RIGHT, padx=20)
+    def Add_button_function(self):
+        open_new_window=tk.Toplevel(self.window)
+        open_new_window.title("Add Note")
+        open_new_window.geometry("1200x700")
+        open_new_window.configure(bg="#212121")
 
-        palette_button = Button(
-                            right_buttons_frame, 
-                            text="🎨", 
-                            font=('Arial', 20),
-                            bg='#292929', 
-                            fg='white', 
-                            borderwidth=0,
-                            activebackground='#252525',
-                            command=choose_text_color)
-        palette_button.pack(side=LEFT, padx=10, pady=5)
+        Top_sidebar_frame = tk.Frame(open_new_window, height=60, bg='#181818')
+        Top_sidebar_frame.pack(side="top", fill="x")
+
+        category_label = tk.Label(
+            Top_sidebar_frame, 
+            text="Select Category:", 
+            font=('Arial Rounded MT Bold', 12),
+            bg='#181818', 
+            fg='white')
+        category_label.pack(side="left", padx=(20,10), pady=10)
+
+        # Create a style object
+        category_dropdown_colour = ttk.Style()
+
+        # Configure the Combobox style
+        category_dropdown_colour.configure(
+            "Custom.TCombobox",  # Custom style name
+            background="black",  # Background color of the combobox
+            foreground="white",  # Text color
+            fieldbackground="black"  # Background color of the dropdown list
+        )
+
+        category_type = tk.StringVar()
+        category_dropdown = ttk.Combobox(
+            Top_sidebar_frame, 
+            textvariable=category_type,
+            values=["Financial Plans", "Investment Opportunities", "Receipts"],
+            state="readonly",  # Prevents manual text entry
+            width=30,
+            style="Custom.TCombobox"
+            )
+        category_dropdown.pack(side="left", padx=10, pady=10)
+
+        #called function when the button is clicked
+        def no_image_button_click():
+            insert_picture(note_text_box)
+
+        Picture_button = tk.Button(
+            Top_sidebar_frame, 
+            text="🖼️", 
+            font=(25),
+            bg='#181818', 
+            fg='white', 
+            borderwidth=0,
+            activebackground='#202020',
+            command=no_image_button_click
+            )
+        Picture_button.pack(side="right", pady=10, padx=10)
+
+        def on_color_button_click():
+            choose_text_colour(note_text_box)
+
+        Colour_button = tk.Button(
+            Top_sidebar_frame, 
+            text="🎨", 
+            font=(25),
+            bg='#181818', 
+            fg='white', 
+            borderwidth=0,
+            activebackground='#202020',
+            command=on_color_button_click
+            )
+        Colour_button.pack(side="right", pady=10, padx=30)
+
+        Undo_button = tk.Button(
+            Top_sidebar_frame, 
+            text="↻", 
+            font=("Arial", 25),
+            bg='#181818', 
+            fg='white', 
+            borderwidth=0,
+            activebackground='#202020'
+            )
+        Undo_button.pack(side="right", pady=10, padx=10)
+
+        Redo_button = tk.Button(
+            Top_sidebar_frame, 
+            text="↺", 
+            font=("Arial", 25),
+            bg='#181818', 
+            fg='white', 
+            borderwidth=0,
+            activebackground='#202020'
+            )
+        Redo_button.pack(side="right", pady=10, padx=20)
+
+        save_buttonn = tk.Button(
+            Top_sidebar_frame,
+            text="💾",
+            font=(25),
+            bg="#181818",
+            fg="white",
+            borderwidth=0,
+            activebackground="#202020",
+            command=lambda: save_note(note_text_box, tag_text_box, category_dropdown)
+        )   
+        save_buttonn.pack(side="right", pady=15, padx=30)
         
-        picture_buttons_frame = Frame(horizontal_sidebar, bg='#292929')
-        picture_buttons_frame.pack(side=RIGHT, padx=2)
-        
-        # Picture button
-        picture_button = Button(picture_buttons_frame, 
-                            text="🖼️", 
-                            font=('Arial', 20),
-                            bg='#292929', 
-                            fg='white', 
-                            borderwidth=0,
-                            activebackground='#252525',
-                            command=insert_picture)
-        picture_button.pack(side=LEFT, padx=5, pady=5)
+        tag_text_box_label = tk.Label(
+            open_new_window,
+            text="Tags: ",
+            font=("Arial", 13, "bold"),
+            bg="#212121",
+            fg="white"
+        )
+        tag_text_box_label.pack(pady=10)
 
-        undo_redo_frame = Frame(horizontal_sidebar, bg='#292929')
-        undo_redo_frame.pack(side=RIGHT, padx=10)
+        tag_text_box = tk.Text(
+            open_new_window,
+            height=3,
+            width=123,
+            bg="#292929", 
+            fg="white",
+            font=("Arial", 14),
+            wrap=tk.WORD,
+            borderwidth=2,
+            relief=tk.SUNKEN #Border style
+        )
+        tag_text_box.pack(padx=10, pady=(5, 10))
+        # # To insert text
+        # tag_text_box.insert(tk.END, "Initial text")
+        # # To get the text
+        # tag_text_content = tag_text_box.get("1.0", tk.END)
+        # # To clear the text
+        # tag_text_box.delete("1.0", tk.END)
 
-        # Undo button
-        undo_button = Button(undo_redo_frame, 
-                            text="↺", 
-                            font=('Arial', 20),
-                            bg='#292929', 
-                            fg='white', 
-                            borderwidth=0,
-                            activebackground='#252525',
-                            command=lambda: [
-                                Note_text_box.edit_undo(),
-                                text_box.edit_undo()
-                            ])
-        undo_button.pack(side=LEFT, padx=5, pady=5)
+        note_text_box_label = tk.Label(
+            open_new_window,
+            text="Note: ",
+            font=("Arial", 13, "bold"),
+            bg="#212121",
+            fg="white"
+        )
+        note_text_box_label.pack(pady=10)
 
-        # Redo button
-        redo_button = Button(undo_redo_frame, 
-                            text="↻", 
-                            font=('Arial', 20),
-                            bg='#292929', 
-                            fg='white', 
-                            borderwidth=0,
-                            activebackground='#252525',
-                            command=lambda: [
-                                Note_text_box.edit_redo(),
-                                text_box.edit_redo()
-                            ])
-        redo_button.pack(side=LEFT, padx=40, pady=5)
+        note_text_box = tk.Text(
+            open_new_window,
+            height=30,
+            width=150,
+            bg="#292929", 
+            fg="white",
+            font=("Arial", 14),
+            wrap=tk.WORD,
+            borderwidth=2,
+            relief=tk.SUNKEN #Border style
+        )
+        note_text_box.pack(padx=10, pady=(5, 10))
+        # # To insert text
+        # note_text_box.insert(tk.END, "Initial text")
+        # # To get the text
+        # note_text_content = note_text_box.get("1.0", tk.END)
+        # # To clear the text
+        # note_text_box.delete("1.0", tk.END)
 
-        text_frame = Frame(new_note_window, bg='#212121')
-        text_frame.pack(fill=BOTH, expand=True, padx=20, pady=(20, 10))
+        def insert_picture(note_text_box):
+            image_file_location = filedialog.askopenfilename(
+                title='Select Image', 
+                filetype=[
+                    ("Image files", "*.png *.jpg *.jpeg *.gif *.bmp"),
+                    ("All files", "*.*")
+                ]
+            )
 
-        text_title = Label(text_frame, 
-                            text="Tags: ", 
-                            font=('Arial', 12, 'bold'), 
-                            bg='#212121', 
-                            fg='white')
-        text_title.pack(anchor='w', padx=10, pady=(10, 5))  # Align left and add padding
-
-        text_box = Text(text_frame, 
-                        font=('Arial', 16), 
-                        bg='#292929', 
-                        fg='white', 
-                        insertbackground='white',  # Makes cursor visible
-                        wrap=WORD,  # Wrap text by words
-                        borderwidth=0, 
-                        relief=FLAT,
-                        width=120,
-                        height=2,
-                        undo=True,
-                        maxundo=-1)
-        text_box.pack(padx=10, pady=(5, 10))
-
-        Note_text_frame = Frame(new_note_window, bg='#212121')
-        Note_text_frame.pack(fill=BOTH, expand=True, padx=20, pady=0)
-
-        Note_text_title = Label(Note_text_frame, 
-                            text="Note: ", 
-                            font=('Arial', 14, 'bold'), 
-                            bg='#212121', 
-                            fg='white')
-        Note_text_title.pack(anchor='w', padx=10, pady=(20, 15))  # Align left and add padding
-
-        Note_text_box = Text(Note_text_frame, 
-                        font=('Arial', 16), 
-                        bg='#292929', 
-                        fg='white', 
-                        insertbackground='white',  # Makes cursor visible
-                        wrap=WORD,  # Wrap text by words
-                        borderwidth=0, 
-                        relief=FLAT,
-                        width=120,
-                        height=25,
-                        undo=True,
-                        maxundo=-1)
-        Note_text_box.pack(padx=10, pady=10)
-
-        if file_path:
+            if not image_file_location:
+                return
+            
             try:
-                doc = Document(file_path)
-                # Load document contents into text boxes
-                # This is a simplified example and you'll need to adapt it
+                #Open the image
+                img = Image.open(image_file_location)
+
+                #Resize image if it's too large 
+                max_width = 600
+                if img.width > max_width:
+                    ratio = max_width / img.width
+                    new_height = int(img.height * ratio)
+                    img = img.resize((max_width, new_height), Image.LANCZOS)
+                #Convert to photo image
+                photo = ImageTk.PhotoImage(img)
+                #Insert picture into note_text_box
+                note_text_box.image_create(tk.END, image=photo)
+                # Keep a reference to prevent garbage collection
+                if not hasattr(note_text_box, 'images'):
+                    note_text_box.images = []
+                note_text_box.images.append(photo)
+
+                #Insert a newline after Image
+                note_text_box.insert(tk.END, '\n')
+
             except Exception as e:
-                messagebox.showerror("Error", f"Failed to open note: {str(e)}")
+                messagebox.showerror("Error", f"Could not open image: {str(e)}")
 
-    def ThreeLine_button_action(self):
-        if not self.sidebar_visible:
-            # Show sidebar aligned to the left side of the main frame
-            # You can adjust these parameters to change positioning
-            self.sidebar.pack(side=LEFT,   # Horizontal positioning
-                              fill=Y,
-                              padx=0,      # Vertical filling
-                              anchor='w')     # West (left) alignment
-            self.sidebar_visible = True
-        else:
-            # Hide sidebar completely
-            self.sidebar.pack_forget()
-            self.sidebar_visible = False
+        def choose_text_colour(note_text_box):
+            color = colorchooser.askcolor(title="Choose text color")[1]
+
+            if color:   
+                #Try to change text color in tags box
+                try:
+                    start = note_text_box.index(tk.SEL_FIRST)
+                    end = note_text_box.index(tk.SEL_LAST)
+                    # Create a unique tag name for this color
+                    tag_name = f"color_{color}"
+                    #Apply colour in tags box
+                    note_text_box.tag_add("colored", start, end)
+                    note_text_box.tag_configure("colored", foreground=color)
+
+                except tk.TclError:
+                    #No text selected, apply to future typing
+                    tag_name = f"color_{color}"
+                    note_text_box.tag_configure(tag_name, foreground=color)
+                    # Get the current cursor position
+                    current_pos = note_text_box.index(tk.INSERT)
+                    # Set the default tag for future text input
+                    note_text_box.tag_add(tag_name, current_pos)
+
+        # Collect text color information
+        def collect_color_data(note_text_box):
+            color_info = []
+            # Get all tags in the text box
+            all_tags = note_text_box.tag_names()
+            # Filter tags that start with "color_"
+            color_tags = [tag for tag in all_tags if tag.startswith("color_")]
+            for tag in color_tags:
+                    start = "1.0"
+                    while True:
+                        try:
+                            # Find text ranges with this color tag
+                            start_index = note_text_box.tag_nextrange(tag, start)[0]
+                            end_index = note_text_box.tag_nextrange(tag, start)[1]
+                            
+                            # Get the colored text
+                            colored_text = note_text_box.get(start_index, end_index)
+                            color = tag.split("_")[1]
+                            
+                            color_info.append({
+                                "color": color,
+                                "text": colored_text,
+                                "start_index": start_index,
+                                "end_index": end_index
+                            })
+                            
+                            # Move start to continue searching
+                            start = end_index
+                        except tk.TclError:
+                            # No more ranges found
+                            break
+            return color_info
+
+        def save_note(note_text_box, tag_text_box, category_dropdown):
+            """
+            Advanced note saving function that comprehensively stores text colors and images
             
-            if hasattr(self, 'home_button') and self.home_button is not None:
-                self.home_button.destroy()
-                self.home_button = None
-        
-        if not hasattr(self, 'home_button') or self.home_button is None:
-            self.home_button = Button(self.sidebar,
-                                text="   🏠    Home",
-                                font=('Arial', 16, 'bold'),
-                                bg='#181818',
-                                fg='white',
-                                borderwidth=0,
-                                anchor='w',
-                                justify=LEFT,
-                                width=15,
-                                activebackground='#202020')
-            self.home_button.pack(side=TOP,anchor='w', pady=20, padx=10, fill=X)
-        
-    def Search_button_action(self):
-        # Add a flag to track search bar visibility
-        self.search_bar_visible = False
-
-        # Prepare the search frame but don't pack it initially
-        self.search_frame = Frame(self.T_sidebar, bg='#181818')
-
-        # Search entry
-        self.search_var = StringVar()
-        self.search_entry = Entry(self.search_frame, 
-                                  textvariable=self.search_var, 
-                                  font=('Arial', 12), 
-                                  bg='#292929', 
-                                  fg='white', 
-                                  insertbackground='white',
-                                  width=50)
-        self.search_entry.pack(side=LEFT, padx=10, fill=X, expand=True)
-
-        # Toggle search bar visibility
-        if not self.search_bar_visible:
-            # Show the search bar
-            self.search_frame.pack(side=LEFT, padx=20, pady=10, expand=True, fill=X)
-            self.search_bar_visible = True
-            self.search_entry.focus_set()  # Optional: set focus to search entry
-        else:
-            # Hide the search bar
-            self.search_frame.pack_forget()
-            self.search_bar_visible = False
+            Args:
+            - note_text_box: Tkinter Text widget containing the note content
+            - tag_text_box: Tkinter Text widget containing tags
+            - category_dropdown: Tkinter Combobox for category selection
+            """
+            # Get the note content
+            note_content = note_text_box.get("1.0", tk.END).strip()
+            # Get tags
+            tags_content = tag_text_box.get("1.0", tk.END).strip()
+            # Get category
+            category = category_dropdown.get()
             
-            # Optional: Reset search and reload all notes when closing
-            self.search_var.set('')
-            self.load_notes()
-
-    def Out_button_action(self):
-        print("Button click success!")
-
-    def Clear_Main_Screen(self):
-        for widget in self.root.winfo_children():
-            widget.destroy()
+            # If no content, return
+            if not note_content:
+                messagebox.showwarning("Warning", "No content to save.")
+                return
+            
+            # Prepare save directory
+            save_directory = r"D:\School\YEAR 1 SEM 2\Software Development Fundation\SOFTWARE-DEVELOPMENT-ASSIGNMENT\Notes"
+            os.makedirs(save_directory, exist_ok=True)
+            
+            # Prepare note data dictionary
+            note_data = {
+                "category": category,
+                "tags": tags_content.split(',') if tags_content else [],
+                "content": note_content,
+                "text_colors": [],
+                "images": []
+            }
+            
+            # Collect color information (debugging print)
+            color_data = collect_color_data(note_text_box)
+            print("Collected color data:", color_data)  # This will print the color information to console
+            
+            # Add the collected color data to note_data
+            note_data["text_colors"] = color_data
+            
+            # Collect image information
+            def collect_and_save_images():
+                image_details = []
+                if hasattr(note_text_box, 'images'):
+                    for img in note_text_box.images:
+                        try:
+                            # Generate a unique filename
+                            image_filename = f"note_image_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png"
+                            image_path = os.path.join(save_directory, "images", image_filename)
+                            
+                            # Create images directory if it doesn't exist
+                            os.makedirs(os.path.join(save_directory, "images"), exist_ok=True)
+                            
+                            # Save the image
+                            # Note: This assumes the image is a PhotoImage from Tkinter
+                            # You might need to convert it to a PIL Image first
+                            pil_image = ImageTk.getimage(img)
+                            pil_image.save(image_path)
+                            
+                            # Optionally, create a base64 encoded version for easier storage
+                            buffered = io.BytesIO()
+                            pil_image.save(buffered, format="PNG")
+                            
+                            image_details.append({
+                                "filename": image_filename,
+                                "path": image_path,
+                                "width": pil_image.width,
+                                "height": pil_image.height
+                            })
+                        
+                        except Exception as e:
+                            print(f"Error saving image: {e}")
+                
+                return image_details
+            
+            # Collect and store image information
+            note_data["images"] = collect_and_save_images()
+            
+            # Prepare notes file path
+            notes_file_path = os.path.join(save_directory, "notes.json")
+            
+            try:
+                # Read existing notes or create new list
+                if os.path.exists(notes_file_path):
+                    with open(notes_file_path, 'r', encoding='utf-8') as f:
+                        try:
+                            notes = json.load(f)
+                        except json.JSONDecodeError:
+                            notes = []
+                else:
+                    notes = []
+                
+                # Add new note
+                notes.append(note_data)
+                
+                # Save updated notes
+                with open(notes_file_path, 'w', encoding='utf-8') as f:
+                    json.dump(notes, f, indent=4, ensure_ascii=False)
+                
+                # Optional: Clear the text boxes after saving
+                note_text_box.delete('1.0', tk.END)
+                tag_text_box.delete('1.0', tk.END)
+                
+                messagebox.showinfo("Success", "Note saved successfully!")
+            
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not save note: {str(e)}")
 
 def note():
-    # root = Tk()
+    #root = Tk()
     app = NotesOrganizer()
     app.run()
 
