@@ -12,6 +12,8 @@ import datetime
 import os
 import time
 
+import math
+
 
 containerBg = "#0D0D0D" 
 sidebarBg = "#1a1c1e"  
@@ -57,41 +59,64 @@ class ReminderApp:
         )
         lbReminder.pack(side=LEFT,padx=20,pady=10)
 
-        self.treeTodayFrame_expanded = False
+        self.treeTodayFrame_expanded = True
         self.treeTmrFrame_expanded = False
         self.treeUpcomingFrame_expanded = False
+        self.is_today_icon_rotated = False
+        self.is_tmr_icon_rotated = False            
+        self.is_upcoming_icon_rotated =  False
         self.treeFrame_min_height = 50
-        self.treeFrame_max_height = 200
+        self.treeFrame_max_height = 230
 
         tableFrame = Frame(
             self.container,
             width=900,
-            height=600,
+            height=750,
             bg=containerBg
             )
-        tableFrame.pack(anchor=NW)
+        tableFrame.pack(side=LEFT,anchor=NW)
         tableFrame.pack_propagate(False)
 
         self.treeTodayFrame = Frame(
             tableFrame,
-            height=self.treeFrame_min_height,
+            height=self.treeFrame_max_height,
             width= 900,
             bg=containerBg,
             )
         self.treeTodayFrame.pack()
         self.treeTodayFrame.pack_propagate(False)
 
-        self.btopentreeToday = Button(
+        self.tableNavToday = Frame(
             self.treeTodayFrame,
-            text="Today",
+            height=50,
+            bg=containerBg,
+            )
+        self.tableNavToday.pack(side=TOP,fill=X)
+        self.tableNavToday.pack_propagate(False)
+
+
+        self.btopentreeToday = Button(
+            self.tableNavToday,
+            text="Today ",
             fg="white",
             font=("Arial", 20),
             bg=containerBg,
             activebackground=containerBg,
             bd=0,
-            command= lambda : self.animate_frame(window = self.container,frame=self.treeTodayFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeTodayFrame_expanded)
+            command= lambda : [self.animate_frame(window = self.container,frame=self.treeTodayFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeTodayFrame_expanded),self.rotate_arrow(frame=self.tableNavToday,icon_status = self.is_today_icon_rotated,label=self.downIconToday,iconPath = 'icon/up.png')]
         )
-        self.btopentreeToday.pack(side=TOP,anchor=NW,padx=25)
+        self.btopentreeToday.pack(side=LEFT,anchor=NW,padx=(25,0))
+
+        self.downToday_icon = Image.open('icon/up.png')
+        self.downToday_icon = self.downToday_icon.resize((30,30))
+        self.downToday_icon = ImageTk.PhotoImage(self.downToday_icon)
+        self.downIconToday = Label(
+            self.tableNavToday,
+            image=self.downToday_icon,
+            bg=containerBg,
+        )
+        self.downIconToday.pack(side=LEFT,anchor=NW,pady=10)
+
 
         self.treeTmrFrame = Frame(
             tableFrame,
@@ -102,17 +127,36 @@ class ReminderApp:
         self.treeTmrFrame.pack()
         self.treeTmrFrame.pack_propagate(False)
 
-        self.btopentreeTmr = Button(
+        self.tableNavTmr = Frame(
             self.treeTmrFrame,
+            height=50,
+            bg=containerBg,
+            )
+        self.tableNavTmr.pack(side=TOP,fill=X)
+        self.tableNavTmr.pack_propagate(False)
+
+        self.btopentreeTmr = Button(
+            self.tableNavTmr,
             text="Tomorrow",
             fg="white",
             font=("Arial", 20),
             bg=containerBg,
             activebackground=containerBg,
             bd=0,
-            command= lambda : self.animate_frame(window = self.container,frame=self.treeTmrFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeTmrFrame_expanded)
+            command= lambda : [self.animate_frame(window = self.container,frame=self.treeTmrFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeTmrFrame_expanded),self.rotate_arrow(frame=self.tableNavTmr,icon_status = self.is_tmr_icon_rotated,label=self.downIconTmr,iconPath='icon/down.png')]
         )
-        self.btopentreeTmr.pack(side=TOP,anchor=NW,padx=25)
+        self.btopentreeTmr.pack(side=LEFT,anchor=NW,padx=(25,0))
+
+        self.downTmr_icon = Image.open('icon/down.png')
+        self.downTmr_icon = self.downTmr_icon.resize((30,30))
+        self.downTmr_icon = ImageTk.PhotoImage(self.downTmr_icon)
+
+        self.downIconTmr = Label(
+            self.tableNavTmr,
+            image=self.downTmr_icon,
+            bg=containerBg,
+        )
+        self.downIconTmr.pack(side=LEFT,anchor=NW,pady=10)
 
         self.treeUpcomingFrame = Frame(
             tableFrame,
@@ -123,17 +167,36 @@ class ReminderApp:
         self.treeUpcomingFrame.pack()
         self.treeUpcomingFrame.pack_propagate(False)
 
-        self.btopentreeUpcoming = Button(
+        self.tableNavUpcoming = Frame(
             self.treeUpcomingFrame,
+            height=50,
+            bg=containerBg,
+            )
+        self.tableNavUpcoming.pack(side=TOP,fill=X)
+        self.tableNavUpcoming.pack_propagate(False)
+
+        self.btopentreeUpcoming = Button(
+            self.tableNavUpcoming,
             text="Upcoming",
             fg="white",
             font=("Arial", 20),
             bg=containerBg,
             activebackground=containerBg,
             bd=0,
-            command= lambda : self.animate_frame(window = self.container,frame=self.treeUpcomingFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeUpcomingFrame_expanded)
+            command= lambda : [self.animate_frame(window = self.container,frame=self.treeUpcomingFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeUpcomingFrame_expanded),self.rotate_arrow(frame=self.tableNavUpcoming,icon_status = self.is_upcoming_icon_rotated,label=self.downIconUpcoming,iconPath='icon/down.png')]
         )
-        self.btopentreeUpcoming.pack(side=TOP,anchor=NW,padx=25)
+        self.btopentreeUpcoming.pack(side=LEFT,anchor=NW,padx=(25,0))
+
+        self.downUpcoming_icon = Image.open('icon/down.png')
+        self.downUpcoming_icon = self.downUpcoming_icon.resize((30,30))
+        self.downUpcoming_icon = ImageTk.PhotoImage(self.downUpcoming_icon)
+
+        self.downIconUpcoming = Label(
+            self.tableNavUpcoming,
+            image=self.downUpcoming_icon,
+            bg=containerBg,
+        )
+        self.downIconUpcoming.pack(side=LEFT,anchor=NW,pady=10)
 
         if not os.path.exists("Reminder_Data_Record.txt"):
             with open("Reminder_Data_Record.txt",'w') as file:
@@ -182,13 +245,17 @@ class ReminderApp:
             show = 'headings',
         )
 
-        self.clockFrame = Frame(
+        self.clockScreen_height = 600
+        self.clockScreen_width = 545
+
+        self.clockFrame = Canvas(
             self.container,
-            width=900,
-            height=600,
-            bg="white"
+            width=self.clockScreen_width,
+            height=self.clockScreen_height,
+            bg=containerBg
             )
-        self.clockFrame.pack()
+        self.clockFrame.pack(side=LEFT,anchor=NE)
+        self.clockFrame.pack_propagate(False)
         
         self.create_table(tree=self.treeToday,frame=self.treeTodayFrame)
         self.create_table(tree=self.treeTmr,frame=self.treeTmrFrame)
@@ -201,8 +268,19 @@ class ReminderApp:
         self.current_hour = int(time.strftime("%H"))
         self.current_minute = int(time.strftime("%M"))
         self.current_sec = int(time.strftime("%S"))
+
+        self.digitalClock = Label(
+            self.clockFrame,
+            text="",
+            fg = "white",
+            font=("Arial", 30),
+            bg = containerBg
+        ) 
+        self.digitalClock.pack(side=BOTTOM,pady=30)
+
         self.recurring()
         self.Arrange_date()
+        self.clock()
 
     def clearFrame(self, container):
         for widget in container.winfo_children():
@@ -489,7 +567,7 @@ class ReminderApp:
     def update_datetime(self):
         self.current_time_updated = time.strftime("%I:%M %p")
         self.current_date_updated = datetime.date.today().strftime("%d/%m/%Y")
-        self.window.after(1000, self.update_datetime)
+        self.container.after(1000, self.update_datetime)
     
     def savedata(self):
         data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nSEC | {self.selected_sec} \nRECURRENCE TYPE | {self.recurrence_type}\n\n"
@@ -546,7 +624,7 @@ class ReminderApp:
         tree.column('Date', anchor=CENTER, width=25)
         tree.column('Time', anchor=CENTER, width=20)
         tree.column('Recurrence Type', anchor=CENTER, width=150)
-        tree.pack(fill=X, expand=True,padx=40,pady=10)
+        tree.pack(side=LEFT, fill=X, expand=True,padx=40,pady=10)
         
         # Add scrollbar and define the mouse
         self.v_scroll = ttk.Scrollbar(frame,orient=VERTICAL,command=tree.yview)
@@ -605,6 +683,92 @@ class ReminderApp:
             case _:
                 pass
     
+    def rotate_arrow( self,frame,icon_status,label,iconPath):
+        icon = Image.open(iconPath)
+        icon = icon.resize((30,30))
+        
+        if not icon_status:
+            self.rotated_icon = icon.rotate(angle=180)
+        else:
+            self.rotated_icon = icon
+        
+        match frame:
+            case self.tableNavToday:
+                self.is_today_icon_rotated = not self.is_today_icon_rotated
+            case self.tableNavTmr:
+                self.is_tmr_icon_rotated = not self.is_tmr_icon_rotated           
+            case self.tableNavUpcoming:
+                self.is_upcoming_icon_rotated = not self.is_upcoming_icon_rotated 
+            case _:
+                pass
+
+        self.update_icon = ImageTk.PhotoImage(self.rotated_icon)
+        label.config(image=self.update_icon)
+        label.image = self.update_icon  # Keep a reference to avoid garbage collection
+        frame.update()
+
+    def clock(self):
+        self.clockFrame.delete("all")
+        self.display_ampm = time.strftime("%p")
+        self.draw_markings()
+        curr_time = time.strftime('%I%M%S', time.localtime(time.time()))
+        self.display_ampm = time.strftime("%p")
+        drawClock_second = int(curr_time[4]) * 10 + int(curr_time[5])
+        drawClock_minutes = int(curr_time[2]) * 10 + int(curr_time[3])
+        drawClock_hours = int(curr_time[0]) * 10 + int(curr_time[1])
+        # Draw arcs
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 200, 0, drawClock_second * 6, 11, "green")
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 180, 0, drawClock_minutes * 6, 11, "blue")
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 160, 0, drawClock_hours * 30, 11, "red")
+
+        # Draw clock hands
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 140, drawClock_second * 6, 5, "green")
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 120, drawClock_minutes * 6, 5, "blue")
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 100, drawClock_hours * 30, 5, "red")
+        self.digitalClock.config(text="{:02d}:{:02d}:{:02d} {}".format(drawClock_hours, drawClock_minutes, drawClock_second, self.display_ampm))
+        self.container.after(1000,self.clock)
+
+    def draw_markings(self):
+        d = 100
+        d2 = 10
+        for i in range(0, 360, 30):
+            # start point
+            x1 = self.clockScreen_width // 2 + d * math.cos(math.radians(i))
+            y1 = self.clockScreen_height // 2 + d * math.sin(math.radians(i))
+            # end point
+            x2 = x1 + d2 * math.cos(math.radians(i))
+            y2 = y1 + d2 * math.sin(math.radians(i))
+            self.clockFrame.create_line(x1, y1, x2, y2, fill="white", width=5)
+
+    def arc(self,center, radius, start, end, thickness, color):
+            x0 = center[0] - radius
+            y0 = center[1] - radius
+            x1 = center[0] + radius
+            y1 = center[1] + radius
+
+            adjusted_start = (start + 90) % 360  # Subtract 90° (rotate) and keep within 0-360 range
+    
+
+            # Tkinter angles are counterclockwise from 0°, adjust accordingly
+            self.clockFrame.create_arc(
+                x0, y0, x1, y1,
+                start=adjusted_start,
+                extent= start - end,
+                outline=color,
+                width=thickness,
+                style="arc"
+            )
+    
+    def clock_hand(self,center, radius, angle, thickness, color):
+        x = center[0] + radius * math.cos(math.radians(angle - 90))
+        y = center[1] + radius * math.sin(math.radians(angle - 90))
+        self.clockFrame.create_line(
+        center[0], center[1], x, y,
+        fill=color,
+        width=thickness
+    )
+        
+
 
 def reminder(): 
     app = ReminderApp()
