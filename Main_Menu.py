@@ -24,6 +24,7 @@ class MainMenu:
         # Create UI components
         self.create_ui()
         self.create_sidebar_content()
+        Expense_Tracker(self.content_frame,self.secondSidebar)
 
     def create_ui(self):
         # Top navigation frame
@@ -98,8 +99,6 @@ class MainMenu:
         self.btName.place(x=80 , y =10) 
 
     def switch_indication(self,indication_lb):
-
-        self.home_btn_indicator.config(bg=sidebarBg)
         self.expense_btn_indicator.config(bg=sidebarBg)
         self.reminder_btn_indicator.config(bg=sidebarBg)
         self.note_btn_indicator.config(bg=sidebarBg)
@@ -108,32 +107,12 @@ class MainMenu:
         
     def create_sidebar_content(self):
         """Create sidebar menu items"""
-        self.home_btn_indicator = Label(
+        self.expense_btn_indicator = Label(
             self.sidebar,
             bg="white"
         )
-        self.home_btn_indicator.place(x=3,y=43, height=40,width=3)
+        self.expense_btn_indicator.place(x=3,y=43, height=40,width=3)
 
-        self.home_icon = Image.open('icon/home.png')
-        self.home_icon = self.home_icon.resize((40,40))
-        self.home_icon= ImageTk.PhotoImage(self.home_icon)
-        btHome = Button(
-            self.sidebar, 
-            image=self.home_icon,
-            width=40,
-            height=40,
-            bg=sidebarBg,
-            activebackground=sidebarBg,
-            bd=0,
-            command=lambda: [self.switch_indication(self.home_btn_indicator)]
-        )
-        btHome.place(x=15, y=40)
-
-        self.expense_btn_indicator = Label(
-            self.sidebar,
-            bg=sidebarBg
-        )
-        self.expense_btn_indicator.place(x=3,y=125, height=40,width=3)
         self.expense_icon = Image.open('icon/expense.png')
         self.expense_icon = self.expense_icon.resize((40,40))
         self.expense_icon = ImageTk.PhotoImage(self.expense_icon)
@@ -147,13 +126,14 @@ class MainMenu:
             bd=0,
         )
         btexpense.config(command=lambda: [self.switch_indication(self.expense_btn_indicator), Expense_Tracker(self.content_frame,self.secondSidebar)])
-        btexpense.place(x=15, y= 125)
+        btexpense.place(x=15, y= 43)
 
         self.reminder_btn_indicator = Label(
             self.sidebar,
             bg=sidebarBg
         )
-        self.reminder_btn_indicator.place(x=3,y=203, height=40,width=3)
+        self.reminder_btn_indicator.place(x=3,y=125, height=40,width=3)
+
         self.reminder_icon = Image.open('icon/bell.png')
         self.reminder_icon = self.reminder_icon.resize((40,40))
         self.reminder_icon = ImageTk.PhotoImage(self.reminder_icon)
@@ -165,15 +145,15 @@ class MainMenu:
             bg=sidebarBg,
             bd=0,
             activebackground=sidebarBg,
-            command=lambda: [self.switch_indication(self.reminder_btn_indicator),ReminderApp(container = self.content_frame)]
+            command=lambda: [self.switch_indication(self.reminder_btn_indicator),ReminderApp(container = self.content_frame,sidebar=self.secondSidebar)]
         )
-        btReminder.place(x=15, y= 202)
+        btReminder.place(x=15, y= 125)
         
         self.note_btn_indicator = Label(
             self.sidebar,
             bg=sidebarBg
         )
-        self.note_btn_indicator.place(x=3,y=282, height=40,width=3)
+        self.note_btn_indicator.place(x=3,y=203, height=40,width=3)
         self.note_icon = Image.open('icon/note.png')
         self.note_icon = self.note_icon.resize((40,40))
         self.note_icon = ImageTk.PhotoImage(self.note_icon)
@@ -187,7 +167,7 @@ class MainMenu:
             activebackground=sidebarBg,
             command=lambda: [self.switch_indication(self.note_btn_indicator),NotesOrganizer(self.content_frame,self.secondSidebar)]
         )
-        btNote.place(x=15, y= 279)
+        btNote.place(x=15, y= 203)
 
     def _animate_sidebar(self):
         """Smooth sidebar animation"""

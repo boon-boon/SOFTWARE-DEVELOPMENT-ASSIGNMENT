@@ -19,9 +19,12 @@ sidebarBg = "#1a1c1e"
 textbg = "#212121" 
 
 class ReminderApp:
-    def __init__(self, container):
+    def __init__(self, container,sidebar):
         self.container = container
+        self.sidebar_Frame = sidebar
         self.clearFrame(self.container)
+        self.Clear_Sidebar_Frame()
+        self.print_sidebar()
 
         navigationFrame = Frame(
             self.container,
@@ -93,7 +96,6 @@ class ReminderApp:
         self.tableNavToday.pack(side=TOP,fill=X)
         self.tableNavToday.pack_propagate(False)
 
-
         self.btopentreeToday = Button(
             self.tableNavToday,
             text="Today ",
@@ -115,7 +117,6 @@ class ReminderApp:
             bg=containerBg,
         )
         self.downIconToday.pack(side=LEFT,anchor=NW,pady=10)
-
 
         self.treeTmrFrame = Frame(
             tableFrame,
@@ -752,6 +753,32 @@ class ReminderApp:
         width=thickness
     )
         
+    def print_sidebar(self):
+        self.dsd = Frame(self.sidebar_Frame, bg='#2f3336',height=1080,width=250)
+        self.dsd.pack()
+        self.dsd.pack_propagate()
+        
+        button = Button(
+            self.dsd,
+            text="🏠  Home",
+            font=("Arial",18),
+            fg="white",
+            bg="#2f3336",
+            activebackground=textbg,
+            activeforeground="white",
+            relief=FLAT,
+            anchor='w',
+            padx=15,
+            width=25,
+            pady=20,
+            borderwidth=0,
+            command= lambda: ReminderApp()
+        )
+        button.pack(fill=X)
+
+    def Clear_Sidebar_Frame(self):
+        for widget in self.sidebar_Frame.winfo_children():
+            widget.destroy()
 def reminder(): 
     app = ReminderApp()
     app.run()

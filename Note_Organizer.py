@@ -18,10 +18,11 @@ class NotesOrganizer:
         
         self.container = container
         self.sidebar = sidebar
+        self.Check_Data()
         self.Clear_Sidebar_Frame()
         self.Main_Menu()
         self.Sidebar()
-        self.Check_Data()
+        
     
     def Main_Menu(self):
         self.Edit_File = False
