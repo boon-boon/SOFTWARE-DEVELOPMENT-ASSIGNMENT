@@ -2,6 +2,7 @@ from tkinter import *
 from PIL import Image,ImageTk
 from Reminder import ReminderApp
 from Final_Expense_Tracker import Expense_Tracker
+from Note_Organizer import NotesOrganizer
 
 
 sidebarBg = "#1a1c1e"       
