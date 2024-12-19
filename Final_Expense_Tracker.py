@@ -11,7 +11,6 @@ from tkinter import Toplevel, Label, messagebox
 import time
 
 class Expense_Tracker:
-
 #--------------------------------------------------------------
     def __init__(self, container,sidebar):
         #Basic initialize
@@ -60,6 +59,7 @@ class Expense_Tracker:
         self.Clear_Sidebar()
         self.Sidebar()
         self.Create_Center_Content()
+
 
 #--------------------------------------------------------------
     def Create_Center_Content(self):
@@ -121,7 +121,6 @@ class Expense_Tracker:
         #     bar_chart.place(x=300,y=10+(i*60))
         #     self.Animate_Bar_Chart(bar_chart,min=0,max=max_width)
         
-        
         #This is for assets page
         #Print pie chart for expense
         # fig=Figure(figsize=(5,5),dpi=100)
@@ -155,7 +154,7 @@ class Expense_Tracker:
         center_Content_Rectangle.image = self.img
         center_Content_Rectangle.place(x=15,y=155)
         
-        print_exp_history_frame = Frame(self.Middle_Frame,width=890,height=400,bg=self.SIDEBAR_COLOR)
+        print_exp_history_frame = Frame(self.Middle_Frame,width=800,height=400,bg=self.SIDEBAR_COLOR)
         print_exp_history_frame.place(x=40,y=240)
         print_exp_history_frame.pack_propagate(False)
         
@@ -165,7 +164,7 @@ class Expense_Tracker:
         
         self.style.configure(
             "Custom.Treeview",
-            background=self.bar_chart_bg,      
+            background=self.SIDEBAR_COLOR,      
             fieldbackground=self.SIDEBAR_COLOR, 
             foreground="white",          
             font=('Arial', 13)
@@ -200,7 +199,7 @@ class Expense_Tracker:
         self.tree.pack(expand=True, fill=BOTH)
         
         #Add scrollbar and define the mouse
-        self.v_scroll = ttk.Scrollbar(self.Middle_Frame,orient=VERTICAL,command=self.tree.yview)
+        self.v_scroll = ttk.Scrollbar(print_exp_history_frame,orient=VERTICAL,command=self.tree.yview)
         self.tree.bind("<MouseWheel>", self.Mouse_Scroll)
         
         self.load_data_into_tree()
@@ -225,9 +224,10 @@ class Expense_Tracker:
         self.top5_high_exp[4] = sum(self.top5_low_exp)
         self.top5_high_exp_type[4] = 'Other'
         
-        fig = Figure(figsize=(5,5), dpi=110)
+        fig = Figure(figsize=(5,5), dpi=110) # Size of the pie chart
         fig.patch.set_facecolor(self.SIDEBAR_COLOR)
         ax = fig.add_subplot(111)
+        # Array
         ax.pie(self.top5_high_exp, labels=self.top5_high_exp_type,autopct='%1.1f%%', startangle=90)
         for text in ax.texts:
             text.set_color('white')
@@ -235,7 +235,7 @@ class Expense_Tracker:
         
         canvas=FigureCanvasTkAgg(fig,master=self.Middle_Frame)
         canvas.draw()
-        canvas.get_tk_widget().place(x=900,y=170)
+        canvas.get_tk_widget().place(x=870,y=170)
         
         #Print word at the last to avoid been cover
         print_Expense_History = Label(self.Middle_Frame,text="Expense History", font=self.FONT_BIG, bg=self.SIDEBAR_COLOR,fg='white')
@@ -766,6 +766,7 @@ class Expense_Tracker:
         for record in data:
             self.tree.insert('', END, values=(record["Date"], record["Amount"], record["Account"], record["Category"], record["Description"]))
 
+
 #--------------------------------------------------------------
     #Store the category and account
     def Store_Assets1(self, category=None, account=None):
@@ -780,7 +781,7 @@ class Expense_Tracker:
     def Store_Assets2(self,description=None, amount=None, date=None,category=None):
         #Debug
         if amount.isalpha() == 1 or self.ACTIVE_BUTTON1 == None or self.ACTIVE_BUTTON2 == None:
-            self.Invalid_Input()
+            messagebox.showerror("Error", "Please fill it correctly")
             return
 
         #If no descripiton than print nothings into notepad
@@ -902,6 +903,7 @@ class Expense_Tracker:
         self.selected_Data = self.tree.selection()
         
         values = self.tree.item(self.selected_Data, "values")
+        
         
         self.Open_Edit_Window(values)
 
@@ -1075,16 +1077,6 @@ class Expense_Tracker:
                 file.write(f"Date: {record[0]}\nCategory: {record[3]}\nDescription: {record[4]}\nAmount: {record[1]}\nAccount: {record[2]}\n\n")
         
         self.Create_Center_Content()
-
-#--------------------------------------------------------------
-    def Invalid_Input(self):
-        error_window = Tk()
-        error_window.title("Invalid input")
-        error_window.geometry('400x200')
-        
-        error_message = Label(error_window,text="Invalid Input",fg='red',font=self.FONT_BIG)
-        error_message.pack()
-        error_window.mainloop()
         
         
 #--------------------------------------------------------------
@@ -1118,7 +1110,7 @@ class Expense_Tracker:
                 width=25,
                 pady=20,
                 borderwidth=0,
-                command=section_callbacks.get(item_text.strip(), lambda: None)
+                command=section_callbacks.get(item_text.strip())
             )
             button.pack(fill=X)
             
@@ -1141,12 +1133,12 @@ class Expense_Tracker:
         # frm1_frm2.pack_propagate(False)
         
         # self.Load_Image("Expense_Tracker_Photo/Black_Rectangle1.png", 1425,120)
-        # lbl1_frm1_frm2 = Label(frm1_frm2, image=self.img, width=1500, height=140, bg='green',text='Net Assets\n\n\n', compound=CENTER, fg='white',font=self.FONT_MAIN)
+        # lbl1_frm1_frm2 = Label(frm1_frm2, image=self.img, width=1500, height=100, bg='green',text='Net Assets\n\n\n', compound=CENTER, fg='white',font=self.FONT_MAIN)
         # lbl1_frm1_frm2.image = self.img
         # lbl1_frm1_frm2.pack()
         # lbl1_frm1_frm2.pack_propagate(False)
         
-        # lbl2_frm1_frm2 = Label(frm1_frm2, text=f'{{self.Total_Assets:.2f}}',fg='white',compound=CENTER)
+        # lbl2_frm1_frm2 = Label(frm1_frm2, text=f'{self.Total_Assets:.2f}',fg='white',compound=CENTER,bg='black')
         # lbl2_frm1_frm2.pack()
         
         assets_Page_Navigator = Frame(self.Middle_Frame,height=65,width=1920,bg=self.SIDEBAR_COLOR)
@@ -1220,7 +1212,7 @@ class Expense_Tracker:
         
         canvas = FigureCanvasTkAgg(fig, master=self.Middle_Frame)
         canvas.draw()
-        canvas.get_tk_widget().place(x=950,y=240)
+        canvas.get_tk_widget().place(x=870,y=240)
         
         print_Acc_Balance_Pie_Chart = Label(self.Middle_Frame, text="Account Balances",bg=self.SIDEBAR_COLOR,font=self.FONT_MAIN,fg="white")
-        print_Acc_Balance_Pie_Chart.place(x=1130,y=240)
+        print_Acc_Balance_Pie_Chart.place(x=1070,y=240)
