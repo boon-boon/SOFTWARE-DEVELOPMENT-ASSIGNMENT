@@ -11,7 +11,6 @@ from datetime import timedelta
 import datetime
 import os
 import time
-
 import math
 
 
@@ -225,7 +224,7 @@ class ReminderApp:
             self.treeTodayFrame,
             height= 10,
             style="Custom.Treeview",
-            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type'),
+            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type','Status'),
             show = 'headings',
         )
 
@@ -233,7 +232,7 @@ class ReminderApp:
             self.treeTmrFrame,
             height= 10,
             style="Custom.Treeview",
-            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type'),
+            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type','Status'),
             show = 'headings',
         )
 
@@ -241,7 +240,7 @@ class ReminderApp:
             self.treeUpcomingFrame,
             height= 10,
             style="Custom.Treeview",
-            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type'),
+            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type','Status'),
             show = 'headings',
         )
 
@@ -252,7 +251,7 @@ class ReminderApp:
             self.container,
             width=self.clockScreen_width,
             height=self.clockScreen_height,
-            bg=containerBg
+            bg=containerBg,
             )
         self.clockFrame.pack(side=LEFT,anchor=NE)
         self.clockFrame.pack_propagate(False)
@@ -366,7 +365,7 @@ class ReminderApp:
             selectcolor="black",
             variable=self.isCheckboxTick,
             onvalue=1,
-            offvalue=0
+            offvalue=0,
         )
         setTimeCheckbox.pack()
 
@@ -389,7 +388,8 @@ class ReminderApp:
             showweeknumbers=False,
             weekendbackground="white",
             weekendforeground="black",
-            othermonthwebackground="white"
+            othermonthwebackground="white",
+            state="readonly"
         )
         self.date_entry.pack()
 
@@ -427,7 +427,7 @@ class ReminderApp:
         lbRecurring.pack(pady=10)
 
         self.recurrence_type = ["Don't repeat", "Everyday", "Every week", "Every month", "Every year"]
-        self.setrecurringCombobox = ttk.Combobox(self.setTimeFrame, values=self.recurrence_type, font=("Times", 10), width=30)
+        self.setrecurringCombobox = ttk.Combobox(self.setTimeFrame, values=self.recurrence_type, font=("Times", 10), width=30,state="readonly")
         self.setrecurringCombobox.set("Don't repeat")
         self.setrecurringCombobox.pack()
 
@@ -492,51 +492,35 @@ class ReminderApp:
                 self.recurring()
                 self.Arrange_date()
                 self.window.destroy()
-            if self.selected_date == self.current_date:
                 self.set_notification()
 
     def set_notification(self):
         self.update_datetime()
-        self.set_checktime()
-        
-        for i in range(self.reminderArrRow):
-            if (self.reminderArr[i][2] == self.current_date_updated and self.reminderArr[i][3] == self.current_time_updated):
+        self.update_file()
+        self.update_data = ""
+
+        for i in range(self.reminderListRow):
+            if (str(self.reminderList[i][2]) == self.current_date_updated and str(self.reminderList[i][3]) == self.current_time_updated and self.reminderList[i][5]=="inactive"):
                 notification.notify(
-                    title=self.reminderArr[i][0],
-                    message=self.reminderArr[i][1],
+                    title=self.reminderList[i][0],
+                    message=self.reminderList[i][1],
                     app_name="Notifier", 
                     app_icon="icon/ico.ico",
                     toast=True,
                     timeout=10
                 )
-        
-        self.container.after(self.checktime, self.set_notification)
-
-    def set_checktime(self): 
-        for i in range(self.reminderArrRow):
-            sec = int(self.reminderArr[i][4])
-            parts = self.reminderArr[i][3].split(":")
-            second_parts = parts[1].split(" ")
-
-            if  second_parts[1]== "PM" and parts[0] == "12":
-                selected_hour = 12
-            elif  second_parts[1]== "AM" and parts[0] == "12":
-                selected_hour = 0
-            elif second_parts[1]== "PM" and parts[0] != "12":
-                selected_hour = int(parts[0]) + 12
-            else:
-                selected_hour = int(parts[0])
-            
-            selected_minute = int(second_parts[0])
-                
-            selected_sec = (selected_hour * 3600) + (selected_minute * 60) + sec
-            current_sec = (self.current_hour * 3600) + (self.current_minute * 60) + self.current_sec
-            self.checktime = (selected_sec - current_sec) * 1000
+                self.reminderList[i][5] = "active"
+        with open("Reminder_Data_Record.txt", 'w') as file:
+            for i in range(self.reminderListRow):
+                self.update_data = f"TITLE | {self.reminderList[i][0]} \nDESCRIPTION | {self.reminderList[i][1]} \nDATE | {self.reminderList[i][2]} \nTIME | {self.reminderList[i][3]} \nRECURRENCE TYPE | {self.reminderList[i][4]}\nSTATUS | {self.reminderList[i][5]}\n\n"
+                file.write(self.update_data)
+        file.close()
+        self.container.after(1000, self.set_notification)
 
     def update_file(self):
-        self.reminderArr = []
+        self.reminderList = []
         with open("Reminder_Data_Record.txt", 'r') as file:
-            arr = [None for _ in range(6)]
+            valueList = [None for _ in range(6)]
             lines = file.readlines()    
             i = 0
         
@@ -546,23 +530,23 @@ class ReminderApp:
                     key = parts[0].strip()
                     value = parts[1].strip()
                     if key == "TITLE":
-                        arr[0] = value
+                        valueList[0] = value
                     elif key == "DESCRIPTION":
-                        arr[1] = value 
+                        valueList[1] = value 
                     elif key == "DATE":
-                        arr[2] = value
+                        valueList[2] = value
                     elif key == "TIME":
-                        arr[3] = value
-                    elif key == "SEC":
-                        arr[4] = value
+                        valueList[3] = value
+                    elif key == "RECURRENCE TYPE":
+                        valueList[4] = value
                     else:
-                        arr[5] = value
+                        valueList[5] = value
                     i += 1
                     if i == 6:
                         i = 0
-                        self.reminderArr.append(arr)
-                        arr = [None] * 6
-            self.reminderArrRow = len(self.reminderArr)
+                        self.reminderList.append(valueList)
+                        valueList = [None] * 6
+            self.reminderListRow = len(self.reminderList)
 
     def update_datetime(self):
         self.current_time_updated = time.strftime("%I:%M %p")
@@ -570,7 +554,7 @@ class ReminderApp:
         self.container.after(1000, self.update_datetime)
     
     def savedata(self):
-        data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nSEC | {self.selected_sec} \nRECURRENCE TYPE | {self.recurrence_type}\n\n"
+        data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | inactive\n\n"
         with open("Reminder_Data_Record.txt", 'a') as file:
             file.write(data)
         file.close()
@@ -578,14 +562,14 @@ class ReminderApp:
     def recurring(self):
         self.update_file()
 
-        for i in range(self.reminderArrRow):
-            self.current_reminder_date = datetime.datetime.strptime(self.reminderArr[i][2], "%d/%m/%Y").date()
-            if  self.current_reminder_date <  self.current_date  and self.reminderArr[i][5] != "Don't repeat":
-                self.recurrence_title = self.reminderArr[i][0]
-                self.recurrence_description = self.reminderArr[i][1]
-                self.recurrence_time = self.reminderArr[i][3]
-                self.recurrence_selected_sec = 0
-                self.recurrence_recurrence_type = self.reminderArr[i][5]
+        for i in range(self.reminderListRow):
+            self.current_reminder_date = datetime.datetime.strptime(self.reminderList[i][2], "%d/%m/%Y").date()
+            if  self.current_reminder_date <  self.current_date  and self.reminderList[i][4] != "Don't repeat":
+                self.recurrence_title = self.reminderList[i][0]
+                self.recurrence_description = self.reminderList[i][1]
+                self.recurrence_time = self.reminderList[i][3]
+                self.recurrence_recurrence_type = self.reminderList[i][4]
+                self.recurrence_status = self.reminderList[i][5]
 
                 if self.recurrence_recurrence_type == "Every year":
                     self.recurrence_date = self.current_reminder_date + relativedelta(years=1)
@@ -598,7 +582,7 @@ class ReminderApp:
                 
                 with open("Reminder_Data_Record.txt", 'r') as file:
                     existing_records = file.read()
-                info = f"TITLE | {self.recurrence_title} \nDESCRIPTION | {self.recurrence_description} \nDATE | {self.recurrence_date.strftime('%d/%m/%Y')} \nTIME | {self.recurrence_time} \nSEC | {self.recurrence_selected_sec} \nRECURRENCE TYPE | {self.recurrence_recurrence_type}\n\n"
+                info = f"TITLE | {self.recurrence_title} \nDESCRIPTION | {self.recurrence_description} \nDATE | {self.recurrence_date.strftime('%d/%m/%Y')} \nTIME | {self.recurrence_time} \nRECURRENCE TYPE | {self.recurrence_recurrence_type}\nSTATUS | {self.recurrence_status}\n\n"
                 if info != existing_records :
                     with open("Reminder_Data_Record.txt", 'a') as file:
                         file.write(info)
@@ -618,12 +602,14 @@ class ReminderApp:
         tree.heading('Date', text='Date')
         tree.heading('Time', text='Time')
         tree.heading('Recurrence Type', text='Recurrence Type')
+        tree.heading('Status', text='Status')
         
-        tree.column('Title', anchor=CENTER, width=150)
-        tree.column('Description', anchor=CENTER, width=150)
-        tree.column('Date', anchor=CENTER, width=25)
-        tree.column('Time', anchor=CENTER, width=20)
-        tree.column('Recurrence Type', anchor=CENTER, width=150)
+        tree.column('Title', anchor=CENTER, width=145)
+        tree.column('Description', anchor=CENTER, width=145)
+        tree.column('Date', anchor=CENTER, width=30)
+        tree.column('Time', anchor=CENTER, width=25)
+        tree.column('Recurrence Type', anchor=CENTER, width=130)
+        tree.column('Status', anchor=CENTER, width=20)
         tree.pack(side=LEFT, fill=X, expand=True,padx=40,pady=10)
         
         # Add scrollbar and define the mouse
@@ -636,23 +622,23 @@ class ReminderApp:
         self.delete_tree(tree=self.treeTmr)
         self.delete_tree(tree=self.treeUpcoming)
 
-        for i in range(self.reminderArrRow):
-            self.reminder_date = datetime.datetime.strptime(self.reminderArr[i][2], "%d/%m/%Y").date()
+        for i in range(self.reminderListRow):
+            self.reminder_date = datetime.datetime.strptime(self.reminderList[i][2], "%d/%m/%Y").date()
             difference_in_dates = self.reminder_date - self.current_date
             match difference_in_dates:
                 case timedelta(days=0):
-                    self.update_tree(tree=self.treeToday,title=self.reminderArr[i][0], description=self.reminderArr[i][1], date=self.reminderArr[i][2], time=self.reminderArr[i][3],recurrence_type=self.reminderArr[i][5])
+                    self.update_tree(tree=self.treeToday,title=self.reminderList[i][0], description=self.reminderList[i][1], date=self.reminderList[i][2], time=self.reminderList[i][3],recurrence_type=self.reminderList[i][4],status=self.reminderList[i][5])
                 case timedelta(days=1):
-                    self.update_tree(tree=self.treeTmr,title=self.reminderArr[i][0], description=self.reminderArr[i][1], date=self.reminderArr[i][2], time=self.reminderArr[i][3],recurrence_type=self.reminderArr[i][5])
+                    self.update_tree(tree=self.treeTmr,title=self.reminderList[i][0], description=self.reminderList[i][1], date=self.reminderList[i][2], time=self.reminderList[i][3],recurrence_type=self.reminderList[i][4],status=self.reminderList[i][5])
                 case _:
-                    self.update_tree(tree=self.treeUpcoming,title=self.reminderArr[i][0], description=self.reminderArr[i][1], date=self.reminderArr[i][2], time=self.reminderArr[i][3],recurrence_type=self.reminderArr[i][5])
+                    self.update_tree(tree=self.treeUpcoming,title=self.reminderList[i][0], description=self.reminderList[i][1], date=self.reminderList[i][2], time=self.reminderList[i][3],recurrence_type=self.reminderList[i][4],status=self.reminderList[i][5])
     
     def delete_tree(self,tree):
         for row in tree.get_children():
             tree.delete(row)
 
-    def update_tree(self,tree,title,description,date,time,recurrence_type):
-        tree.insert('', END, values=(title,description,date,time,recurrence_type))
+    def update_tree(self,tree,title,description,date,time,recurrence_type,status):
+        tree.insert('', END, values=(title,description,date,time,recurrence_type,status))
         
     def Mouse_Scroll_Today(self,event):
         self.treeToday.yview_scroll(-1 * (event.delta // 120), "units")
@@ -704,28 +690,28 @@ class ReminderApp:
 
         self.update_icon = ImageTk.PhotoImage(self.rotated_icon)
         label.config(image=self.update_icon)
-        label.image = self.update_icon  # Keep a reference to avoid garbage collection
+        label.image = self.update_icon  
         frame.update()
 
     def clock(self):
         self.clockFrame.delete("all")
         self.display_ampm = time.strftime("%p")
         self.draw_markings()
-        curr_time = time.strftime('%I%M%S', time.localtime(time.time()))
+        self.curr_time = time.strftime('%I%M%S', time.localtime(time.time()))
         self.display_ampm = time.strftime("%p")
-        drawClock_second = int(curr_time[4]) * 10 + int(curr_time[5])
-        drawClock_minutes = int(curr_time[2]) * 10 + int(curr_time[3])
-        drawClock_hours = int(curr_time[0]) * 10 + int(curr_time[1])
+        self.drawClock_second = int(self.curr_time[4]) * 10 + int(self.curr_time[5])
+        self.drawClock_minutes = int(self.curr_time[2]) * 10 + int(self.curr_time[3])
+        self.drawClock_hours = int(self.curr_time[0]) * 10 + int(self.curr_time[1])
         # Draw arcs
-        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 200, 0, drawClock_second * 6, 11, "green")
-        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 180, 0, drawClock_minutes * 6, 11, "blue")
-        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 160, 0, drawClock_hours * 30, 11, "red")
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 200, 0, self.drawClock_second * 6, 11, "green")
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 180, 0, self.drawClock_minutes * 6, 11, "blue")
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 160, 0, self.drawClock_hours * 30, 11, "red")
 
         # Draw clock hands
-        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 140, drawClock_second * 6, 5, "green")
-        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 120, drawClock_minutes * 6, 5, "blue")
-        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 100, drawClock_hours * 30, 5, "red")
-        self.digitalClock.config(text="{:02d}:{:02d}:{:02d} {}".format(drawClock_hours, drawClock_minutes, drawClock_second, self.display_ampm))
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 140, self.drawClock_second * 6, 5, "green")
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 120, self.drawClock_minutes * 6, 5, "blue")
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 100, self.drawClock_hours * 30, 5, "red")
+        self.digitalClock.config(text="{:02d}:{:02d}:{:02d} {}".format(self.drawClock_hours, self.drawClock_minutes, self.drawClock_second, self.display_ampm))
         self.container.after(1000,self.clock)
 
     def draw_markings(self):
@@ -746,10 +732,8 @@ class ReminderApp:
             x1 = center[0] + radius
             y1 = center[1] + radius
 
-            adjusted_start = (start + 90) % 360  # Subtract 90° (rotate) and keep within 0-360 range
+            adjusted_start = (start + 90) % 360  
     
-
-            # Tkinter angles are counterclockwise from 0°, adjust accordingly
             self.clockFrame.create_arc(
                 x0, y0, x1, y1,
                 start=adjusted_start,
@@ -768,8 +752,6 @@ class ReminderApp:
         width=thickness
     )
         
-
-
 def reminder(): 
     app = ReminderApp()
     app.run()

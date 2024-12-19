@@ -188,7 +188,6 @@ class MainMenu:
         )
         btNote.place(x=15, y= 279)
 
-
     def _animate_sidebar(self):
         """Smooth sidebar animation"""
         if not self.is_sidebar_expanded:
