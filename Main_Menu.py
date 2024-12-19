@@ -2,7 +2,7 @@ from tkinter import *
 from PIL import Image,ImageTk
 from Reminder import ReminderApp
 from Final_Expense_Tracker import Expense_Tracker
-
+from Note_Organizer import NotesOrganizer
 
 sidebarBg = "#1a1c1e"       
 topNavigationBg = "#1E1E1E" 
@@ -183,7 +183,7 @@ class MainMenu:
             bg=sidebarBg,
             bd=0,
             activebackground=sidebarBg,
-            command=lambda: [self.switch_indication(self.note_btn_indicator),]
+            command=lambda: [self.switch_indication(self.note_btn_indicator),NotesOrganizer(self.content_frame,self.secondSidebar)]
         )
         btNote.place(x=15, y= 279)
 
