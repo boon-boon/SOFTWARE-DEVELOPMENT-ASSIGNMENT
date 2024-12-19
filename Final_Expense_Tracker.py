@@ -11,7 +11,6 @@ from tkinter import Toplevel, Label, messagebox
 import time
 
 class Expense_Tracker:
-
 #--------------------------------------------------------------
     def __init__(self, container,sidebar):
         #Basic initialize
