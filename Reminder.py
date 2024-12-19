@@ -59,7 +59,7 @@ class ReminderApp:
 
         self.treeTodayFrame_expanded = False
         self.treeTmrFrame_expanded = False
-        self.treeSomedayFrame_expanded = False
+        self.treeUpcomingFrame_expanded = False
         self.treeFrame_min_height = 50
         self.treeFrame_max_height = 200
 
@@ -67,9 +67,10 @@ class ReminderApp:
             self.container,
             width=900,
             height=600,
-            bg="white"
+            bg=containerBg
             )
         tableFrame.pack(anchor=NW)
+        tableFrame.pack_propagate(False)
 
         self.treeTodayFrame = Frame(
             tableFrame,
@@ -96,7 +97,7 @@ class ReminderApp:
             tableFrame,
             height=self.treeFrame_min_height,
             width= 900,
-            bg="white",
+            bg=containerBg,
             )
         self.treeTmrFrame.pack()
         self.treeTmrFrame.pack_propagate(False)
@@ -113,6 +114,27 @@ class ReminderApp:
         )
         self.btopentreeTmr.pack(side=TOP,anchor=NW,padx=25)
 
+        self.treeUpcomingFrame = Frame(
+            tableFrame,
+            height=self.treeFrame_min_height,
+            width= 900,
+            bg=containerBg,
+            )
+        self.treeUpcomingFrame.pack()
+        self.treeUpcomingFrame.pack_propagate(False)
+
+        self.btopentreeUpcoming = Button(
+            self.treeUpcomingFrame,
+            text="Upcoming",
+            fg="white",
+            font=("Arial", 20),
+            bg=containerBg,
+            activebackground=containerBg,
+            bd=0,
+            command= lambda : self.animate_frame(window = self.container,frame=self.treeUpcomingFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeUpcomingFrame_expanded)
+        )
+        self.btopentreeUpcoming.pack(side=TOP,anchor=NW,padx=25)
+
         if not os.path.exists("Reminder_Data_Record.txt"):
             with open("Reminder_Data_Record.txt",'w') as file:
                 file.write("")
@@ -125,7 +147,7 @@ class ReminderApp:
             background=containerBg,      
             fieldbackground=containerBg, 
             foreground="white",          
-            font=('Arial', 13)
+            font=('Arial', 13),
         )
 
         # Style for Treeview headers
@@ -136,33 +158,52 @@ class ReminderApp:
             font=('Arial', 14, 'bold'), 
         )
         
-        self.tree = ttk.Treeview(
+        self.treeToday = ttk.Treeview(
             self.treeTodayFrame,
             height= 10,
             style="Custom.Treeview",
             columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type'),
             show = 'headings',
-            
         )
 
-        self.tree.heading('Title', text='Title')
-        self.tree.heading('Description', text='Description')
-        self.tree.heading('Date', text='Date')
-        self.tree.heading('Time', text='Time')
-        self.tree.heading('Recurrence Type', text='Recurrence Type')
+        self.treeTmr = ttk.Treeview(
+            self.treeTmrFrame,
+            height= 10,
+            style="Custom.Treeview",
+            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type'),
+            show = 'headings',
+        )
+
+        self.treeUpcoming = ttk.Treeview(
+            self.treeUpcomingFrame,
+            height= 10,
+            style="Custom.Treeview",
+            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type'),
+            show = 'headings',
+        )
+
+        self.clockFrame = Frame(
+            self.container,
+            width=900,
+            height=600,
+            bg="white"
+            )
+        self.clockFrame.pack()
         
-        self.tree.column('Title', anchor=CENTER, width=150)
-        self.tree.column('Description', anchor=CENTER, width=150)
-        self.tree.column('Date', anchor=CENTER, width=25)
-        self.tree.column('Time', anchor=CENTER, width=20)
-        self.tree.column('Recurrence Type', anchor=CENTER, width=150)
-        self.tree.pack(fill=X, expand=True,padx=40,pady=10)
-        
-        #Add scrollbar and define the mouse
-        self.v_scroll = ttk.Scrollbar(self.treeTodayFrame,orient=VERTICAL,command=self.tree.yview)
-        self.tree.bind("<MouseWheel>", self.Mouse_Scroll)
-        self.print_file()
-        
+        self.create_table(tree=self.treeToday,frame=self.treeTodayFrame)
+        self.create_table(tree=self.treeTmr,frame=self.treeTmrFrame)
+        self.create_table(tree=self.treeUpcoming,frame=self.treeUpcomingFrame)
+
+        self.current_date = datetime.date.today()
+        self.current_year = self.current_date.year
+        self.current_month = self.current_date.month 
+        self.current_day = self.current_date.day
+        self.current_hour = int(time.strftime("%H"))
+        self.current_minute = int(time.strftime("%M"))
+        self.current_sec = int(time.strftime("%S"))
+        self.recurring()
+        self.Arrange_date()
+
     def clearFrame(self, container):
         for widget in container.winfo_children():
             widget.destroy()
@@ -340,15 +381,6 @@ class ReminderApp:
         self.recurrence_type = self.setrecurringCombobox.get()
         isCheckboxTick_type = self.isCheckboxTick.get()
 
-        self.current_date = datetime.date.today()
-        self.current_year = self.current_date.year
-        self.current_month = self.current_date.month 
-        self.current_day = self.current_date.day
-        self.current_hour = int(time.strftime("%H"))
-        self.current_minute = int(time.strftime("%M"))
-        self.current_sec = int(time.strftime("%S"))
-        
-        
         self.selected_date = self.date_entry.get_date()
         self.selected_year = self.selected_date.year
         self.selected_month = self.selected_date.month
@@ -380,8 +412,9 @@ class ReminderApp:
                 self.selected_sec = int(time.strftime("%S"))
                 self.savedata()
                 self.recurring()
-                self.print_file()
+                self.Arrange_date()
                 self.window.destroy()
+            if self.selected_date == self.current_date:
                 self.set_notification()
 
     def set_notification(self):
@@ -468,8 +501,8 @@ class ReminderApp:
         self.update_file()
 
         for i in range(self.reminderArrRow):
-            current_reminder_date = datetime.datetime.strptime(self.reminderArr[i][2], "%d/%m/%Y").date()
-            if  current_reminder_date <  self.current_date  and self.reminderArr[i][5] != "Don't repeat":
+            self.current_reminder_date = datetime.datetime.strptime(self.reminderArr[i][2], "%d/%m/%Y").date()
+            if  self.current_reminder_date <  self.current_date  and self.reminderArr[i][5] != "Don't repeat":
                 self.recurrence_title = self.reminderArr[i][0]
                 self.recurrence_description = self.reminderArr[i][1]
                 self.recurrence_time = self.reminderArr[i][3]
@@ -477,13 +510,13 @@ class ReminderApp:
                 self.recurrence_recurrence_type = self.reminderArr[i][5]
 
                 if self.recurrence_recurrence_type == "Every year":
-                    self.recurrence_date = current_reminder_date + relativedelta(years=1)
+                    self.recurrence_date = self.current_reminder_date + relativedelta(years=1)
                 elif self.recurrence_recurrence_type == "Every month":
-                    self.recurrence_date = current_reminder_date + relativedelta(months=1)
+                    self.recurrence_date = self.current_reminder_date + relativedelta(months=1)
                 elif self.recurrence_recurrence_type == "Every week":
-                    self.recurrence_date = current_reminder_date + timedelta(weeks=1)
+                    self.recurrence_date = self.current_reminder_date + timedelta(weeks=1)
                 else:
-                    self.recurrence_date = current_reminder_date + timedelta(days=1)
+                    self.recurrence_date = self.current_reminder_date + timedelta(days=1)
                 
                 with open("Reminder_Data_Record.txt", 'r') as file:
                     existing_records = file.read()
@@ -492,18 +525,65 @@ class ReminderApp:
                     with open("Reminder_Data_Record.txt", 'a') as file:
                         file.write(info)
                     file.close()
+    
+    def create_table(self,tree,frame):
+        match tree:
+            case self.treeToday:
+                mouseScroll = self.Mouse_Scroll_Today
+            case self.treeTmr:
+                mouseScroll = self.Mouse_Scroll_Tmr
+            case _:
+                mouseScroll = self.Mouse_Scroll_Upcoming
 
-    def print_file(self):
-        self.update_file()
+        tree.heading('Title', text='Title')
+        tree.heading('Description', text='Description')
+        tree.heading('Date', text='Date')
+        tree.heading('Time', text='Time')
+        tree.heading('Recurrence Type', text='Recurrence Type')
         
-        for row in self.tree.get_children():
-            self.tree.delete(row)
+        tree.column('Title', anchor=CENTER, width=150)
+        tree.column('Description', anchor=CENTER, width=150)
+        tree.column('Date', anchor=CENTER, width=25)
+        tree.column('Time', anchor=CENTER, width=20)
+        tree.column('Recurrence Type', anchor=CENTER, width=150)
+        tree.pack(fill=X, expand=True,padx=40,pady=10)
+        
+        # Add scrollbar and define the mouse
+        self.v_scroll = ttk.Scrollbar(frame,orient=VERTICAL,command=tree.yview)
+        self.treeToday.bind("<MouseWheel>", mouseScroll)
 
-        for i in range(self.reminderArrRow): 
-            self.tree.insert('', END, values=(self.reminderArr[i][0], self.reminderArr[i][1], self.reminderArr[i][2],  self.reminderArr[i][3], self.reminderArr[i][5]))
+    def Arrange_date(self):
+        self.update_file()
+        self.delete_tree(tree=self.treeToday)
+        self.delete_tree(tree=self.treeTmr)
+        self.delete_tree(tree=self.treeUpcoming)
 
-    def Mouse_Scroll(self,event):
-        self.tree.yview_scroll(-1 * (event.delta // 120), "units")
+        for i in range(self.reminderArrRow):
+            self.reminder_date = datetime.datetime.strptime(self.reminderArr[i][2], "%d/%m/%Y").date()
+            difference_in_dates = self.reminder_date - self.current_date
+            match difference_in_dates:
+                case timedelta(days=0):
+                    self.update_tree(tree=self.treeToday,title=self.reminderArr[i][0], description=self.reminderArr[i][1], date=self.reminderArr[i][2], time=self.reminderArr[i][3],recurrence_type=self.reminderArr[i][5])
+                case timedelta(days=1):
+                    self.update_tree(tree=self.treeTmr,title=self.reminderArr[i][0], description=self.reminderArr[i][1], date=self.reminderArr[i][2], time=self.reminderArr[i][3],recurrence_type=self.reminderArr[i][5])
+                case _:
+                    self.update_tree(tree=self.treeUpcoming,title=self.reminderArr[i][0], description=self.reminderArr[i][1], date=self.reminderArr[i][2], time=self.reminderArr[i][3],recurrence_type=self.reminderArr[i][5])
+    
+    def delete_tree(self,tree):
+        for row in tree.get_children():
+            tree.delete(row)
+
+    def update_tree(self,tree,title,description,date,time,recurrence_type):
+        tree.insert('', END, values=(title,description,date,time,recurrence_type))
+        
+    def Mouse_Scroll_Today(self,event):
+        self.treeToday.yview_scroll(-1 * (event.delta // 120), "units")
+    
+    def Mouse_Scroll_Tmr(self,event):
+        self.treeTmr.yview_scroll(-1 * (event.delta // 120), "units")
+    
+    def Mouse_Scroll_Upcoming(self,event):
+        self.treeUpcoming.yview_scroll(-1 * (event.delta // 120), "units")
 
     def animate_frame( self,window,frame,max_height,min_height,frame_status):
         if not frame_status:
@@ -520,11 +600,12 @@ class ReminderApp:
                 self.treeTodayFrame_expanded = not self.treeTodayFrame_expanded
             case self.treeTmrFrame:
                 self.treeTmrFrame_expanded = not self.treeTmrFrame_expanded
-            case self.setTimeFrame:
-                self.setTimeFrame_expanded = not self.setTimeFrame_expanded
+            case self.treeUpcomingFrame:
+                self.treeUpcomingFrame_expanded = not self.treeUpcomingFrame_expanded
             case _:
                 pass
-            
+    
+
 def reminder(): 
     app = ReminderApp()
     app.run()
