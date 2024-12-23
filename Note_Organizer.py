@@ -18,7 +18,7 @@ class NotesOrganizer:
         
         self.container = container
         self.sidebar = sidebar
-        self.Check_Data()
+        self.Check_Note()
         self.Clear_Sidebar_Frame()
         self.Main_Menu()
         self.Sidebar()
@@ -39,6 +39,16 @@ class NotesOrganizer:
         self.style = ttk.Style()
         self.style.theme_use("default")
 
+        add_Note = tk.Button(self.top_Navigator, 
+                             text='➕', 
+                             bg='#181818', 
+                             font=self.FONT_MAIN, 
+                             fg='white', width=2, height=25, 
+                             borderwidth=0, activebackground='#181818', 
+                             activeforeground='white', 
+                             command=lambda: self.Add_button_function())
+        add_Note.pack(side=tk.RIGHT, pady=20,padx=50)
+        
         label = tk.Label(self.top_Navigator, text="Note Organizer", bg="#181818", fg="white", font=("Arial Rounded MT Bold", 14))
         label.pack(pady=20)
         
@@ -78,7 +88,7 @@ class NotesOrganizer:
         
         self.rg_Click_Menu = tk.Menu(self.container, tearoff=0)
         self.rg_Click_Menu.add_command(label="Edit", command=self.Open_Note)
-        self.rg_Click_Menu.add_command(label="Delete")
+        self.rg_Click_Menu.add_command(label="Delete", command=self.Delete_Note)
         
         self.tree.bind("<Button-3>", self.Right_Click_Menu)
 
@@ -236,6 +246,11 @@ class NotesOrganizer:
                         self.tree_Data[i][0] = category
                         self.tree_Data[i][1] = tags_content
                         self.tree_Data[i][2] = note_content
+                        if self.image_file_location != 'None':
+                            self.tree_Data[i][3] = self.image_file_location
+                        else:
+                            self.tree_Data[i][3] = self.values[3]
+
                 with open(self.File_Path, 'w') as file:
                     for i in range(len(self.tree_Data)):
                         data = (
@@ -243,24 +258,26 @@ class NotesOrganizer:
                         )
                         for item in data:
                             file.write(item)
-                        file.write('\n\n\n')
+                        file.write('\n\n')
                     messagebox.showinfo("Success","File saved successfully!")
+                self.Edit_File = False
                 self.Edit_File = False
                 self.Main_Menu()
             else:
                 messagebox.showerror("Error", "The note is incomplete!")
         else:
             if note_content and tags_content and category:
-                self.Main_Menu()
                 data={
                     f"Category| {category}\nTags| {tags_content}\nText| {note_content}\nimage_path| {self.image_file_location}" 
                 }
                 with open(self.File_Path, 'a') as file:
                     for item in data:
                         file.write(item)
-                    file.write('\n\n\n')
+                    file.write('\n\n')
                     file.close()
-                    messagebox.showinfo("Success","File saved successfully!")
+                messagebox.showinfo("Success","File saved successfully!")
+                self.Edit_File = False
+                self.Main_Menu()
             else:
                 messagebox.showerror("Error", "The note is incomplete!")
                 
@@ -317,14 +334,11 @@ class NotesOrganizer:
         self.sidebar_Frame.pack_propagate(False)
         
         main_Section = [
-            ("Home", "🏠"),
-            ("New note", "➕"),
-            ("Open file", "Q")
+            ("Home", "🏠")
         ]
         
-        dictionary = {"Home": self.Main_Menu,
-                      "New note": self.Add_button_function,
-                      "Open file": self.Open_Note}
+        dictionary = {"Home": self.Main_Menu
+                      }
     
         for item_text, emoji in main_Section:
             button = tk.Button(
@@ -399,6 +413,41 @@ class NotesOrganizer:
         if not os.path.exists(self.File_Path):
             with open(self.File_Path, 'w')as file:
                 file.write("")
+
+    def Check_Note(self):
+        if not os.path.exists(self.File_Path):
+            with open(self.File_Path, 'w') as file:
+                file.write(" ")
+    
+    def Delete_Note(self):
+        selected_Data = self.tree.selection()
+        self.tree.delete(selected_Data)
+        self.Update_Note()
+        
+    def Update_Note(self):
+        rows = self.tree.get_children()
+        data = []
+        for row in rows:
+            data.append(self.tree.item(row, "values"))
+        
+        with open(self.File_Path, 'w') as file:
+            for tree_item in self.tree_Data:
+                tree_category, tree_tag, tree_text, image_path = tree_item
+                
+                exists_in_data = any(
+                    tree_category == d[0] and tree_tag == d[1] and tree_text == d[2]
+                    for d in data
+                )
+                
+                if exists_in_data:
+                    file_data = (
+                        f"Category| {tree_category}\n"
+                        f"Tags| {tree_tag}\n"
+                        f"Text| {tree_text}\n"
+                        f"image_path| {image_path}\n\n"
+                    )
+                    file.write(file_data)
+
 
 def note():
     app = NotesOrganizer()
