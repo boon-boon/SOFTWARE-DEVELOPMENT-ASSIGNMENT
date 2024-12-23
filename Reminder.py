@@ -11,6 +11,7 @@ from datetime import timedelta
 import datetime
 import os
 import time
+import math
 
 
 containerBg = "#0D0D0D" 
@@ -18,9 +19,12 @@ sidebarBg = "#1a1c1e"
 textbg = "#212121" 
 
 class ReminderApp:
-    def __init__(self, container):
+    def __init__(self, container,sidebar):
         self.container = container
+        self.sidebar_Frame = sidebar
         self.clearFrame(self.container)
+        self.Clear_Sidebar_Frame()
+        self.print_sidebar()
 
         navigationFrame = Frame(
             self.container,
@@ -57,41 +61,62 @@ class ReminderApp:
         )
         lbReminder.pack(side=LEFT,padx=20,pady=10)
 
-        self.treeTodayFrame_expanded = False
+        self.treeTodayFrame_expanded = True
         self.treeTmrFrame_expanded = False
         self.treeUpcomingFrame_expanded = False
+        self.is_today_icon_rotated = False
+        self.is_tmr_icon_rotated = False            
+        self.is_upcoming_icon_rotated =  False
         self.treeFrame_min_height = 50
-        self.treeFrame_max_height = 200
+        self.treeFrame_max_height = 230
 
         tableFrame = Frame(
             self.container,
             width=900,
-            height=600,
+            height=750,
             bg=containerBg
             )
-        tableFrame.pack(anchor=NW)
+        tableFrame.pack(side=LEFT,anchor=NW)
         tableFrame.pack_propagate(False)
 
         self.treeTodayFrame = Frame(
             tableFrame,
-            height=self.treeFrame_min_height,
+            height=self.treeFrame_max_height,
             width= 900,
             bg=containerBg,
             )
         self.treeTodayFrame.pack()
         self.treeTodayFrame.pack_propagate(False)
 
-        self.btopentreeToday = Button(
+        self.tableNavToday = Frame(
             self.treeTodayFrame,
-            text="Today",
+            height=50,
+            bg=containerBg,
+            )
+        self.tableNavToday.pack(side=TOP,fill=X)
+        self.tableNavToday.pack_propagate(False)
+
+        self.btopentreeToday = Button(
+            self.tableNavToday,
+            text="Today ",
             fg="white",
             font=("Arial", 20),
             bg=containerBg,
             activebackground=containerBg,
             bd=0,
-            command= lambda : self.animate_frame(window = self.container,frame=self.treeTodayFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeTodayFrame_expanded)
+            command= lambda : [self.animate_frame(window = self.container,frame=self.treeTodayFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeTodayFrame_expanded),self.rotate_arrow(frame=self.tableNavToday,icon_status = self.is_today_icon_rotated,label=self.downIconToday,iconPath = 'icon/up.png')]
         )
-        self.btopentreeToday.pack(side=TOP,anchor=NW,padx=25)
+        self.btopentreeToday.pack(side=LEFT,anchor=NW,padx=(25,0))
+
+        self.downToday_icon = Image.open('icon/up.png')
+        self.downToday_icon = self.downToday_icon.resize((30,30))
+        self.downToday_icon = ImageTk.PhotoImage(self.downToday_icon)
+        self.downIconToday = Label(
+            self.tableNavToday,
+            image=self.downToday_icon,
+            bg=containerBg,
+        )
+        self.downIconToday.pack(side=LEFT,anchor=NW,pady=10)
 
         self.treeTmrFrame = Frame(
             tableFrame,
@@ -102,17 +127,36 @@ class ReminderApp:
         self.treeTmrFrame.pack()
         self.treeTmrFrame.pack_propagate(False)
 
-        self.btopentreeTmr = Button(
+        self.tableNavTmr = Frame(
             self.treeTmrFrame,
+            height=50,
+            bg=containerBg,
+            )
+        self.tableNavTmr.pack(side=TOP,fill=X)
+        self.tableNavTmr.pack_propagate(False)
+
+        self.btopentreeTmr = Button(
+            self.tableNavTmr,
             text="Tomorrow",
             fg="white",
             font=("Arial", 20),
             bg=containerBg,
             activebackground=containerBg,
             bd=0,
-            command= lambda : self.animate_frame(window = self.container,frame=self.treeTmrFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeTmrFrame_expanded)
+            command= lambda : [self.animate_frame(window = self.container,frame=self.treeTmrFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeTmrFrame_expanded),self.rotate_arrow(frame=self.tableNavTmr,icon_status = self.is_tmr_icon_rotated,label=self.downIconTmr,iconPath='icon/down.png')]
         )
-        self.btopentreeTmr.pack(side=TOP,anchor=NW,padx=25)
+        self.btopentreeTmr.pack(side=LEFT,anchor=NW,padx=(25,0))
+
+        self.downTmr_icon = Image.open('icon/down.png')
+        self.downTmr_icon = self.downTmr_icon.resize((30,30))
+        self.downTmr_icon = ImageTk.PhotoImage(self.downTmr_icon)
+
+        self.downIconTmr = Label(
+            self.tableNavTmr,
+            image=self.downTmr_icon,
+            bg=containerBg,
+        )
+        self.downIconTmr.pack(side=LEFT,anchor=NW,pady=10)
 
         self.treeUpcomingFrame = Frame(
             tableFrame,
@@ -123,17 +167,36 @@ class ReminderApp:
         self.treeUpcomingFrame.pack()
         self.treeUpcomingFrame.pack_propagate(False)
 
-        self.btopentreeUpcoming = Button(
+        self.tableNavUpcoming = Frame(
             self.treeUpcomingFrame,
+            height=50,
+            bg=containerBg,
+            )
+        self.tableNavUpcoming.pack(side=TOP,fill=X)
+        self.tableNavUpcoming.pack_propagate(False)
+
+        self.btopentreeUpcoming = Button(
+            self.tableNavUpcoming,
             text="Upcoming",
             fg="white",
             font=("Arial", 20),
             bg=containerBg,
             activebackground=containerBg,
             bd=0,
-            command= lambda : self.animate_frame(window = self.container,frame=self.treeUpcomingFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeUpcomingFrame_expanded)
+            command= lambda : [self.animate_frame(window = self.container,frame=self.treeUpcomingFrame,max_height=self.treeFrame_max_height,min_height=self.treeFrame_min_height,frame_status=self.treeUpcomingFrame_expanded),self.rotate_arrow(frame=self.tableNavUpcoming,icon_status = self.is_upcoming_icon_rotated,label=self.downIconUpcoming,iconPath='icon/down.png')]
         )
-        self.btopentreeUpcoming.pack(side=TOP,anchor=NW,padx=25)
+        self.btopentreeUpcoming.pack(side=LEFT,anchor=NW,padx=(25,0))
+
+        self.downUpcoming_icon = Image.open('icon/down.png')
+        self.downUpcoming_icon = self.downUpcoming_icon.resize((30,30))
+        self.downUpcoming_icon = ImageTk.PhotoImage(self.downUpcoming_icon)
+
+        self.downIconUpcoming = Label(
+            self.tableNavUpcoming,
+            image=self.downUpcoming_icon,
+            bg=containerBg,
+        )
+        self.downIconUpcoming.pack(side=LEFT,anchor=NW,pady=10)
 
         if not os.path.exists("Reminder_Data_Record.txt"):
             with open("Reminder_Data_Record.txt",'w') as file:
@@ -162,7 +225,7 @@ class ReminderApp:
             self.treeTodayFrame,
             height= 10,
             style="Custom.Treeview",
-            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type'),
+            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type','Status'),
             show = 'headings',
         )
 
@@ -170,7 +233,7 @@ class ReminderApp:
             self.treeTmrFrame,
             height= 10,
             style="Custom.Treeview",
-            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type'),
+            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type','Status'),
             show = 'headings',
         )
 
@@ -178,17 +241,21 @@ class ReminderApp:
             self.treeUpcomingFrame,
             height= 10,
             style="Custom.Treeview",
-            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type'),
+            columns = ('Title', 'Description', 'Date', 'Time', 'Recurrence Type','Status'),
             show = 'headings',
         )
 
-        self.clockFrame = Frame(
+        self.clockScreen_height = 600
+        self.clockScreen_width = 545
+
+        self.clockFrame = Canvas(
             self.container,
-            width=900,
-            height=600,
-            bg="white"
+            width=self.clockScreen_width,
+            height=self.clockScreen_height,
+            bg=containerBg,
             )
-        self.clockFrame.pack()
+        self.clockFrame.pack(side=LEFT,anchor=NE)
+        self.clockFrame.pack_propagate(False)
         
         self.create_table(tree=self.treeToday,frame=self.treeTodayFrame)
         self.create_table(tree=self.treeTmr,frame=self.treeTmrFrame)
@@ -201,8 +268,19 @@ class ReminderApp:
         self.current_hour = int(time.strftime("%H"))
         self.current_minute = int(time.strftime("%M"))
         self.current_sec = int(time.strftime("%S"))
+
+        self.digitalClock = Label(
+            self.clockFrame,
+            text="",
+            fg = "white",
+            font=("Arial", 30),
+            bg = containerBg
+        ) 
+        self.digitalClock.pack(side=BOTTOM,pady=30)
+
         self.recurring()
         self.Arrange_date()
+        self.clock()
 
     def clearFrame(self, container):
         for widget in container.winfo_children():
@@ -264,9 +342,33 @@ class ReminderApp:
         )
         self.inputDescription.pack()
 
+        lbDate = Label(
+            self.window,
+            text="DATE:",
+            font=("Times", 15),
+            fg="white",
+            bg=containerBg
+        )
+        lbDate.pack(pady=10)
+
+        self.date_var = StringVar()
+        self.date_entry = DateEntry(
+            self.window, 
+            width=30,
+            font=("Times", 10),
+            textvariable=self.date_var, 
+            date_pattern='dd/MM/yyyy',
+            showweeknumbers=False,
+            weekendbackground="white",
+            weekendforeground="black",
+            othermonthwebackground="white",
+            state="readonly"
+        )
+        self.date_entry.pack()
+
         self.setTimeFrame_expanded = False
         self.setTimeFrame_min_height = 50
-        self.setTimeFrame_max_height = 350
+        self.setTimeFrame_max_height = 300
 
         self.setTimeFrame = Frame(
             self.window,
@@ -288,32 +390,10 @@ class ReminderApp:
             selectcolor="black",
             variable=self.isCheckboxTick,
             onvalue=1,
-            offvalue=0
+            offvalue=0,
         )
         setTimeCheckbox.pack()
 
-        lbDate = Label(
-            self.setTimeFrame,
-            text="DATE:",
-            font=("Times", 15),
-            fg="white",
-            bg=containerBg
-        )
-        lbDate.pack(pady=10)
-
-        self.date_var = StringVar()
-        self.date_entry = DateEntry(
-            self.setTimeFrame, 
-            width=30,
-            font=("Times", 10),
-            textvariable=self.date_var, 
-            date_pattern='dd/MM/yyyy',
-            showweeknumbers=False,
-            weekendbackground="white",
-            weekendforeground="black",
-            othermonthwebackground="white"
-        )
-        self.date_entry.pack()
 
         lbTime = Label(
             self.setTimeFrame,
@@ -349,29 +429,21 @@ class ReminderApp:
         lbRecurring.pack(pady=10)
 
         self.recurrence_type = ["Don't repeat", "Everyday", "Every week", "Every month", "Every year"]
-        self.setrecurringCombobox = ttk.Combobox(self.setTimeFrame, values=self.recurrence_type, font=("Times", 10), width=30)
+        self.setrecurringCombobox = ttk.Combobox(self.setTimeFrame, values=self.recurrence_type, font=("Times", 10), width=30,state="readonly")
         self.setrecurringCombobox.set("Don't repeat")
         self.setrecurringCombobox.pack()
 
-        submitFrame = Frame(
-            self.window,
-            height=self.setTimeFrame_min_height,
-            bg=containerBg,
-        )
-        submitFrame.pack(fill=X)
-
         btSubmit = Button(
-            submitFrame,
+            self.window,
             text="SUBMIT",
             fg="BLACK",
             font=("Times", 12, "bold"),
-            compound=CENTER,
             bg="WHITE",
             activebackground=containerBg,
             bd=0,
             command=lambda: self.set_messagebox()
         )
-        btSubmit.pack(side=BOTTOM, pady=10)
+        btSubmit.pack()
 
     def set_messagebox(self):
         self.title = self.inputTitle.get("1.0", 'end-1c')
@@ -379,13 +451,12 @@ class ReminderApp:
         self.date = self.date_var.get()
         self.selected_time = self.time_picker.time()
         self.recurrence_type = self.setrecurringCombobox.get()
-        isCheckboxTick_type = self.isCheckboxTick.get()
+        self.isCheckboxTick_type = self.isCheckboxTick.get()
 
         self.selected_date = self.date_entry.get_date()
         self.selected_year = self.selected_date.year
         self.selected_month = self.selected_date.month
         self.selected_day = self.selected_date.day
-        
         
         self.selected_minute = self.selected_time[1]
         
@@ -400,12 +471,10 @@ class ReminderApp:
         
         if self.selected_year < self.current_year or (self.selected_year == self.current_year and self.selected_month < self.current_month) or (self.selected_year == self.current_year and self.selected_month == self.current_month and self.selected_day < self.current_day):
             messagebox.showerror("Alert", "You must enter a valid date!")
-        elif (self.selected_date == self.current_date and self.selected_hour < self.current_hour) or (self.selected_date == self.current_date and self.selected_hour == self.current_hour and self.selected_minute < self.current_minute) :
+        elif self.isCheckboxTick_type and ((self.selected_date == self.current_date and self.selected_hour < self.current_hour) or (self.selected_date == self.current_date and self.selected_hour == self.current_hour and self.selected_minute < self.current_minute)) :
             messagebox.showerror("Alert", "You must enter a valid time!")
         elif self.title.strip() == "" or self.description.strip() == "":
-            messagebox.showerror("Alert", "All fields are required!")
-        elif not isCheckboxTick_type:
-            messagebox.showerror("Alert", "Set time is required!")
+            messagebox.showerror("Alert", "Title and description are required!")
         else:
             response = messagebox.askyesno("Notifier Set", "Set notification?")
             if response:
@@ -414,51 +483,47 @@ class ReminderApp:
                 self.recurring()
                 self.Arrange_date()
                 self.window.destroy()
-            if self.selected_date == self.current_date:
                 self.set_notification()
 
     def set_notification(self):
         self.update_datetime()
-        self.set_checktime()
-        
-        for i in range(self.reminderArrRow):
-            if (self.reminderArr[i][2] == self.current_date_updated and self.reminderArr[i][3] == self.current_time_updated):
+        self.update_file()
+        self.update_data = ""
+
+        for i in range(self.reminderListRow):
+            if (str(self.reminderList[i][2]) == self.current_date_updated and str(self.reminderList[i][3]) == self.current_time_updated and self.reminderList[i][5]=="inactive"):
                 notification.notify(
-                    title=self.reminderArr[i][0],
-                    message=self.reminderArr[i][1],
+                    title=self.reminderList[i][0],
+                    message=self.reminderList[i][1],
                     app_name="Notifier", 
                     app_icon="icon/ico.ico",
                     toast=True,
                     timeout=10
                 )
-        
-        self.container.after(self.checktime, self.set_notification)
+                self.reminderList[i][5] = "active"
+            elif (str(self.reminderList[i][2]) == self.current_date_updated) and self.reminderList[i][5]=="inactive":
+                notification.notify(
+                    title=self.reminderList[i][0],
+                    message=self.reminderList[i][1],
+                    app_name="Notifier", 
+                    app_icon="icon/ico.ico",
+                    toast=True,
+                    timeout=10
+                )
+                self.reminderList[i][5] = "active"
 
-    def set_checktime(self): 
-        for i in range(self.reminderArrRow):
-            sec = int(self.reminderArr[i][4])
-            parts = self.reminderArr[i][3].split(":")
-            second_parts = parts[1].split(" ")
-
-            if  second_parts[1]== "PM" and parts[0] == "12":
-                selected_hour = 12
-            elif  second_parts[1]== "AM" and parts[0] == "12":
-                selected_hour = 0
-            elif second_parts[1]== "PM" and parts[0] != "12":
-                selected_hour = int(parts[0]) + 12
-            else:
-                selected_hour = int(parts[0])
-            
-            selected_minute = int(second_parts[0])
-                
-            selected_sec = (selected_hour * 3600) + (selected_minute * 60) + sec
-            current_sec = (self.current_hour * 3600) + (self.current_minute * 60) + self.current_sec
-            self.checktime = (selected_sec - current_sec) * 1000
+        with open("Reminder_Data_Record.txt", 'w') as file:
+            for i in range(self.reminderListRow):
+                self.update_data = f"TITLE | {self.reminderList[i][0]} \nDESCRIPTION | {self.reminderList[i][1]} \nDATE | {self.reminderList[i][2]} \nTIME | {self.reminderList[i][3]} \nRECURRENCE TYPE | {self.reminderList[i][4]}\nSTATUS | {self.reminderList[i][5]}\n\n"
+                file.write(self.update_data)
+        file.close()
+        self.Arrange_date()
+        self.container.after(1000, self.set_notification)
 
     def update_file(self):
-        self.reminderArr = []
+        self.reminderList = []
         with open("Reminder_Data_Record.txt", 'r') as file:
-            arr = [None for _ in range(6)]
+            valueList = [None for _ in range(6)]
             lines = file.readlines()    
             i = 0
         
@@ -468,31 +533,35 @@ class ReminderApp:
                     key = parts[0].strip()
                     value = parts[1].strip()
                     if key == "TITLE":
-                        arr[0] = value
+                        valueList[0] = value
                     elif key == "DESCRIPTION":
-                        arr[1] = value 
+                        valueList[1] = value 
                     elif key == "DATE":
-                        arr[2] = value
+                        valueList[2] = value
                     elif key == "TIME":
-                        arr[3] = value
-                    elif key == "SEC":
-                        arr[4] = value
+                        valueList[3] = value
+                    elif key == "RECURRENCE TYPE":
+                        valueList[4] = value
                     else:
-                        arr[5] = value
+                        valueList[5] = value
                     i += 1
                     if i == 6:
                         i = 0
-                        self.reminderArr.append(arr)
-                        arr = [None] * 6
-            self.reminderArrRow = len(self.reminderArr)
+                        self.reminderList.append(valueList)
+                        valueList = [None] * 6
+            self.reminderListRow = len(self.reminderList)
 
     def update_datetime(self):
         self.current_time_updated = time.strftime("%I:%M %p")
         self.current_date_updated = datetime.date.today().strftime("%d/%m/%Y")
-        self.window.after(1000, self.update_datetime)
+        self.container.after(1000, self.update_datetime)
     
     def savedata(self):
-        data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nSEC | {self.selected_sec} \nRECURRENCE TYPE | {self.recurrence_type}\n\n"
+        match self.isCheckboxTick_type :
+            case 1:
+                data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | inactive\n\n"
+            case 0:
+                data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME |  \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | inactive\n\n"
         with open("Reminder_Data_Record.txt", 'a') as file:
             file.write(data)
         file.close()
@@ -500,14 +569,14 @@ class ReminderApp:
     def recurring(self):
         self.update_file()
 
-        for i in range(self.reminderArrRow):
-            self.current_reminder_date = datetime.datetime.strptime(self.reminderArr[i][2], "%d/%m/%Y").date()
-            if  self.current_reminder_date <  self.current_date  and self.reminderArr[i][5] != "Don't repeat":
-                self.recurrence_title = self.reminderArr[i][0]
-                self.recurrence_description = self.reminderArr[i][1]
-                self.recurrence_time = self.reminderArr[i][3]
-                self.recurrence_selected_sec = 0
-                self.recurrence_recurrence_type = self.reminderArr[i][5]
+        for i in range(self.reminderListRow):
+            self.current_reminder_date = datetime.datetime.strptime(self.reminderList[i][2], "%d/%m/%Y").date()
+            if  self.current_reminder_date <  self.current_date  and self.reminderList[i][4] != "Don't repeat":
+                self.recurrence_title = self.reminderList[i][0]
+                self.recurrence_description = self.reminderList[i][1]
+                self.recurrence_time = self.reminderList[i][3]
+                self.recurrence_recurrence_type = self.reminderList[i][4]
+                self.recurrence_status = self.reminderList[i][5]
 
                 if self.recurrence_recurrence_type == "Every year":
                     self.recurrence_date = self.current_reminder_date + relativedelta(years=1)
@@ -520,7 +589,7 @@ class ReminderApp:
                 
                 with open("Reminder_Data_Record.txt", 'r') as file:
                     existing_records = file.read()
-                info = f"TITLE | {self.recurrence_title} \nDESCRIPTION | {self.recurrence_description} \nDATE | {self.recurrence_date.strftime('%d/%m/%Y')} \nTIME | {self.recurrence_time} \nSEC | {self.recurrence_selected_sec} \nRECURRENCE TYPE | {self.recurrence_recurrence_type}\n\n"
+                info = f"TITLE | {self.recurrence_title} \nDESCRIPTION | {self.recurrence_description} \nDATE | {self.recurrence_date.strftime('%d/%m/%Y')} \nTIME | {self.recurrence_time} \nRECURRENCE TYPE | {self.recurrence_recurrence_type}\nSTATUS | {self.recurrence_status}\n\n"
                 if info != existing_records :
                     with open("Reminder_Data_Record.txt", 'a') as file:
                         file.write(info)
@@ -540,13 +609,15 @@ class ReminderApp:
         tree.heading('Date', text='Date')
         tree.heading('Time', text='Time')
         tree.heading('Recurrence Type', text='Recurrence Type')
+        tree.heading('Status', text='Status')
         
-        tree.column('Title', anchor=CENTER, width=150)
-        tree.column('Description', anchor=CENTER, width=150)
-        tree.column('Date', anchor=CENTER, width=25)
-        tree.column('Time', anchor=CENTER, width=20)
-        tree.column('Recurrence Type', anchor=CENTER, width=150)
-        tree.pack(fill=X, expand=True,padx=40,pady=10)
+        tree.column('Title', anchor=CENTER, width=145)
+        tree.column('Description', anchor=CENTER, width=145)
+        tree.column('Date', anchor=CENTER, width=30)
+        tree.column('Time', anchor=CENTER, width=25)
+        tree.column('Recurrence Type', anchor=CENTER, width=130)
+        tree.column('Status', anchor=CENTER, width=20)
+        tree.pack(side=LEFT, fill=X, expand=True,padx=40,pady=10)
         
         # Add scrollbar and define the mouse
         self.v_scroll = ttk.Scrollbar(frame,orient=VERTICAL,command=tree.yview)
@@ -558,23 +629,23 @@ class ReminderApp:
         self.delete_tree(tree=self.treeTmr)
         self.delete_tree(tree=self.treeUpcoming)
 
-        for i in range(self.reminderArrRow):
-            self.reminder_date = datetime.datetime.strptime(self.reminderArr[i][2], "%d/%m/%Y").date()
+        for i in range(self.reminderListRow):
+            self.reminder_date = datetime.datetime.strptime(self.reminderList[i][2], "%d/%m/%Y").date()
             difference_in_dates = self.reminder_date - self.current_date
             match difference_in_dates:
                 case timedelta(days=0):
-                    self.update_tree(tree=self.treeToday,title=self.reminderArr[i][0], description=self.reminderArr[i][1], date=self.reminderArr[i][2], time=self.reminderArr[i][3],recurrence_type=self.reminderArr[i][5])
+                    self.update_tree(tree=self.treeToday,title=self.reminderList[i][0], description=self.reminderList[i][1], date=self.reminderList[i][2], time=self.reminderList[i][3],recurrence_type=self.reminderList[i][4],status=self.reminderList[i][5])
                 case timedelta(days=1):
-                    self.update_tree(tree=self.treeTmr,title=self.reminderArr[i][0], description=self.reminderArr[i][1], date=self.reminderArr[i][2], time=self.reminderArr[i][3],recurrence_type=self.reminderArr[i][5])
-                case _:
-                    self.update_tree(tree=self.treeUpcoming,title=self.reminderArr[i][0], description=self.reminderArr[i][1], date=self.reminderArr[i][2], time=self.reminderArr[i][3],recurrence_type=self.reminderArr[i][5])
+                    self.update_tree(tree=self.treeTmr,title=self.reminderList[i][0], description=self.reminderList[i][1], date=self.reminderList[i][2], time=self.reminderList[i][3],recurrence_type=self.reminderList[i][4],status=self.reminderList[i][5])
+                case timedelta(days=d) if d > 1:
+                    self.update_tree(tree=self.treeUpcoming,title=self.reminderList[i][0], description=self.reminderList[i][1], date=self.reminderList[i][2], time=self.reminderList[i][3],recurrence_type=self.reminderList[i][4],status=self.reminderList[i][5])
     
     def delete_tree(self,tree):
         for row in tree.get_children():
             tree.delete(row)
 
-    def update_tree(self,tree,title,description,date,time,recurrence_type):
-        tree.insert('', END, values=(title,description,date,time,recurrence_type))
+    def update_tree(self,tree,title,description,date,time,recurrence_type,status):
+        tree.insert('', END, values=(title,description,date,time,recurrence_type,status))
         
     def Mouse_Scroll_Today(self,event):
         self.treeToday.yview_scroll(-1 * (event.delta // 120), "units")
@@ -602,9 +673,120 @@ class ReminderApp:
                 self.treeTmrFrame_expanded = not self.treeTmrFrame_expanded
             case self.treeUpcomingFrame:
                 self.treeUpcomingFrame_expanded = not self.treeUpcomingFrame_expanded
+            case self.setTimeFrame:
+                self.setTimeFrame_expanded = not self.setTimeFrame_expanded
             case _:
                 pass
     
+    def rotate_arrow( self,frame,icon_status,label,iconPath):
+        icon = Image.open(iconPath)
+        icon = icon.resize((30,30))
+        
+        if not icon_status:
+            self.rotated_icon = icon.rotate(angle=180)
+        else:
+            self.rotated_icon = icon
+        
+        match frame:
+            case self.tableNavToday:
+                self.is_today_icon_rotated = not self.is_today_icon_rotated
+            case self.tableNavTmr:
+                self.is_tmr_icon_rotated = not self.is_tmr_icon_rotated           
+            case self.tableNavUpcoming:
+                self.is_upcoming_icon_rotated = not self.is_upcoming_icon_rotated 
+            case _:
+                pass
+
+        self.update_icon = ImageTk.PhotoImage(self.rotated_icon)
+        label.config(image=self.update_icon)
+        label.image = self.update_icon  
+        frame.update()
+
+    def clock(self):
+        self.clockFrame.delete("all")
+        self.display_ampm = time.strftime("%p")
+        self.draw_markings()
+        self.curr_time = time.strftime('%I%M%S', time.localtime(time.time()))
+        self.display_ampm = time.strftime("%p")
+        self.drawClock_second = int(self.curr_time[4]) * 10 + int(self.curr_time[5])
+        self.drawClock_minutes = int(self.curr_time[2]) * 10 + int(self.curr_time[3])
+        self.drawClock_hours = int(self.curr_time[0]) * 10 + int(self.curr_time[1])
+        # Draw arcs
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 200, 0, self.drawClock_second * 6, 11, "green")
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 180, 0, self.drawClock_minutes * 6, 11, "blue")
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 160, 0, self.drawClock_hours * 30, 11, "red")
+
+        # Draw clock hands
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 140, self.drawClock_second * 6, 5, "green")
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 120, self.drawClock_minutes * 6, 5, "blue")
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 100, self.drawClock_hours * 30, 5, "red")
+        self.digitalClock.config(text="{:02d}:{:02d}:{:02d} {}".format(self.drawClock_hours, self.drawClock_minutes, self.drawClock_second, self.display_ampm))
+        self.clockFrame.after(1000,self.clock)
+
+    def draw_markings(self):
+        d = 100
+        d2 = 10
+        for i in range(0, 360, 30):
+            # start point
+            x1 = self.clockScreen_width // 2 + d * math.cos(math.radians(i))
+            y1 = self.clockScreen_height // 2 + d * math.sin(math.radians(i))
+            # end point
+            x2 = x1 + d2 * math.cos(math.radians(i))
+            y2 = y1 + d2 * math.sin(math.radians(i))
+            self.clockFrame.create_line(x1, y1, x2, y2, fill="white", width=5)
+
+    def arc(self,center, radius, start, end, thickness, color):
+            x0 = center[0] - radius
+            y0 = center[1] - radius
+            x1 = center[0] + radius
+            y1 = center[1] + radius
+
+            adjusted_start = (start + 90) % 360  
+    
+            self.clockFrame.create_arc(
+                x0, y0, x1, y1,
+                start=adjusted_start,
+                extent= start - end,
+                outline=color,
+                width=thickness,
+                style="arc"
+            )
+    
+    def clock_hand(self,center, radius, angle, thickness, color):
+        x = center[0] + radius * math.cos(math.radians(angle - 90))
+        y = center[1] + radius * math.sin(math.radians(angle - 90))
+        self.clockFrame.create_line(
+        center[0], center[1], x, y,
+        fill=color,
+        width=thickness
+    )
+        
+    def print_sidebar(self):
+        self.dsd = Frame(self.sidebar_Frame, bg='#2f3336',height=1080,width=250)
+        self.dsd.pack()
+        self.dsd.pack_propagate()
+        
+        button = Button(
+            self.dsd,
+            text="🏠  Home",
+            font=("Arial",18),
+            fg="white",
+            bg="#2f3336",
+            activebackground=textbg,
+            activeforeground="white",
+            relief=FLAT,
+            anchor='w',
+            padx=15,
+            width=25,
+            pady=20,
+            borderwidth=0,
+            command= lambda: ReminderApp()
+        )
+        button.pack(fill=X)
+
+    def Clear_Sidebar_Frame(self):
+        for widget in self.sidebar_Frame.winfo_children():
+            widget.destroy()
 
 def reminder(): 
     app = ReminderApp()

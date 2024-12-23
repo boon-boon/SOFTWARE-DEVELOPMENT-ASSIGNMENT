@@ -11,7 +11,6 @@ from tkinter import Toplevel, Label, messagebox
 import time
 
 class Expense_Tracker:
-
 #--------------------------------------------------------------
     def __init__(self, container,sidebar):
         #Basic initialize
@@ -738,7 +737,6 @@ class Expense_Tracker:
         #Calculate the total
         for i in range(0,4):
             self.Total_Assets += self.income_Amount[i]
-
 
 #--------------------------------------------------------------
     def load_data_into_tree(self):

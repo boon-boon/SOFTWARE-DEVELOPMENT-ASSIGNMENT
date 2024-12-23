@@ -22,7 +22,7 @@ class NotesOrganizer:
         self.Clear_Sidebar_Frame()
         self.Main_Menu()
         self.Sidebar()
-    
+ 
     def Main_Menu(self):
         self.Edit_File = False
         self.Clear_Frame()
@@ -408,6 +408,11 @@ class NotesOrganizer:
         if row_Id:
             self.tree.selection_set(row_Id)
             self.rg_Click_Menu.post(event.x_root, event.y_root)
+    
+    def Check_Data(self):
+        if not os.path.exists(self.File_Path):
+            with open(self.File_Path, 'w')as file:
+                file.write("")
 
     def Check_Note(self):
         if not os.path.exists(self.File_Path):
