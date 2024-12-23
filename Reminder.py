@@ -342,9 +342,33 @@ class ReminderApp:
         )
         self.inputDescription.pack()
 
+        lbDate = Label(
+            self.window,
+            text="DATE:",
+            font=("Times", 15),
+            fg="white",
+            bg=containerBg
+        )
+        lbDate.pack(pady=10)
+
+        self.date_var = StringVar()
+        self.date_entry = DateEntry(
+            self.window, 
+            width=30,
+            font=("Times", 10),
+            textvariable=self.date_var, 
+            date_pattern='dd/MM/yyyy',
+            showweeknumbers=False,
+            weekendbackground="white",
+            weekendforeground="black",
+            othermonthwebackground="white",
+            state="readonly"
+        )
+        self.date_entry.pack()
+
         self.setTimeFrame_expanded = False
         self.setTimeFrame_min_height = 50
-        self.setTimeFrame_max_height = 350
+        self.setTimeFrame_max_height = 300
 
         self.setTimeFrame = Frame(
             self.window,
@@ -370,29 +394,6 @@ class ReminderApp:
         )
         setTimeCheckbox.pack()
 
-        lbDate = Label(
-            self.setTimeFrame,
-            text="DATE:",
-            font=("Times", 15),
-            fg="white",
-            bg=containerBg
-        )
-        lbDate.pack(pady=10)
-
-        self.date_var = StringVar()
-        self.date_entry = DateEntry(
-            self.setTimeFrame, 
-            width=30,
-            font=("Times", 10),
-            textvariable=self.date_var, 
-            date_pattern='dd/MM/yyyy',
-            showweeknumbers=False,
-            weekendbackground="white",
-            weekendforeground="black",
-            othermonthwebackground="white",
-            state="readonly"
-        )
-        self.date_entry.pack()
 
         lbTime = Label(
             self.setTimeFrame,
@@ -432,25 +433,17 @@ class ReminderApp:
         self.setrecurringCombobox.set("Don't repeat")
         self.setrecurringCombobox.pack()
 
-        submitFrame = Frame(
-            self.window,
-            height=self.setTimeFrame_min_height,
-            bg=containerBg,
-        )
-        submitFrame.pack(fill=X)
-
         btSubmit = Button(
-            submitFrame,
+            self.window,
             text="SUBMIT",
             fg="BLACK",
             font=("Times", 12, "bold"),
-            compound=CENTER,
             bg="WHITE",
             activebackground=containerBg,
             bd=0,
             command=lambda: self.set_messagebox()
         )
-        btSubmit.pack(side=BOTTOM, pady=10)
+        btSubmit.pack()
 
     def set_messagebox(self):
         self.title = self.inputTitle.get("1.0", 'end-1c')
@@ -458,13 +451,12 @@ class ReminderApp:
         self.date = self.date_var.get()
         self.selected_time = self.time_picker.time()
         self.recurrence_type = self.setrecurringCombobox.get()
-        isCheckboxTick_type = self.isCheckboxTick.get()
+        self.isCheckboxTick_type = self.isCheckboxTick.get()
 
         self.selected_date = self.date_entry.get_date()
         self.selected_year = self.selected_date.year
         self.selected_month = self.selected_date.month
         self.selected_day = self.selected_date.day
-        
         
         self.selected_minute = self.selected_time[1]
         
@@ -479,12 +471,10 @@ class ReminderApp:
         
         if self.selected_year < self.current_year or (self.selected_year == self.current_year and self.selected_month < self.current_month) or (self.selected_year == self.current_year and self.selected_month == self.current_month and self.selected_day < self.current_day):
             messagebox.showerror("Alert", "You must enter a valid date!")
-        elif (self.selected_date == self.current_date and self.selected_hour < self.current_hour) or (self.selected_date == self.current_date and self.selected_hour == self.current_hour and self.selected_minute < self.current_minute) :
+        elif self.isCheckboxTick_type and ((self.selected_date == self.current_date and self.selected_hour < self.current_hour) or (self.selected_date == self.current_date and self.selected_hour == self.current_hour and self.selected_minute < self.current_minute)) :
             messagebox.showerror("Alert", "You must enter a valid time!")
         elif self.title.strip() == "" or self.description.strip() == "":
-            messagebox.showerror("Alert", "All fields are required!")
-        elif not isCheckboxTick_type:
-            messagebox.showerror("Alert", "Set time is required!")
+            messagebox.showerror("Alert", "Title and description are required!")
         else:
             response = messagebox.askyesno("Notifier Set", "Set notification?")
             if response:
@@ -511,11 +501,23 @@ class ReminderApp:
                     timeout=10
                 )
                 self.reminderList[i][5] = "active"
+            elif (str(self.reminderList[i][2]) == self.current_date_updated) and self.reminderList[i][5]=="inactive":
+                notification.notify(
+                    title=self.reminderList[i][0],
+                    message=self.reminderList[i][1],
+                    app_name="Notifier", 
+                    app_icon="icon/ico.ico",
+                    toast=True,
+                    timeout=10
+                )
+                self.reminderList[i][5] = "active"
+
         with open("Reminder_Data_Record.txt", 'w') as file:
             for i in range(self.reminderListRow):
                 self.update_data = f"TITLE | {self.reminderList[i][0]} \nDESCRIPTION | {self.reminderList[i][1]} \nDATE | {self.reminderList[i][2]} \nTIME | {self.reminderList[i][3]} \nRECURRENCE TYPE | {self.reminderList[i][4]}\nSTATUS | {self.reminderList[i][5]}\n\n"
                 file.write(self.update_data)
         file.close()
+        self.Arrange_date()
         self.container.after(1000, self.set_notification)
 
     def update_file(self):
@@ -555,7 +557,11 @@ class ReminderApp:
         self.container.after(1000, self.update_datetime)
     
     def savedata(self):
-        data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | inactive\n\n"
+        match self.isCheckboxTick_type :
+            case 1:
+                data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | inactive\n\n"
+            case 0:
+                data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME |  \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | inactive\n\n"
         with open("Reminder_Data_Record.txt", 'a') as file:
             file.write(data)
         file.close()
@@ -631,7 +637,7 @@ class ReminderApp:
                     self.update_tree(tree=self.treeToday,title=self.reminderList[i][0], description=self.reminderList[i][1], date=self.reminderList[i][2], time=self.reminderList[i][3],recurrence_type=self.reminderList[i][4],status=self.reminderList[i][5])
                 case timedelta(days=1):
                     self.update_tree(tree=self.treeTmr,title=self.reminderList[i][0], description=self.reminderList[i][1], date=self.reminderList[i][2], time=self.reminderList[i][3],recurrence_type=self.reminderList[i][4],status=self.reminderList[i][5])
-                case _:
+                case timedelta(days=d) if d > 1:
                     self.update_tree(tree=self.treeUpcoming,title=self.reminderList[i][0], description=self.reminderList[i][1], date=self.reminderList[i][2], time=self.reminderList[i][3],recurrence_type=self.reminderList[i][4],status=self.reminderList[i][5])
     
     def delete_tree(self,tree):
@@ -667,6 +673,8 @@ class ReminderApp:
                 self.treeTmrFrame_expanded = not self.treeTmrFrame_expanded
             case self.treeUpcomingFrame:
                 self.treeUpcomingFrame_expanded = not self.treeUpcomingFrame_expanded
+            case self.setTimeFrame:
+                self.setTimeFrame_expanded = not self.setTimeFrame_expanded
             case _:
                 pass
     
@@ -713,7 +721,7 @@ class ReminderApp:
         self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 120, self.drawClock_minutes * 6, 5, "blue")
         self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 100, self.drawClock_hours * 30, 5, "red")
         self.digitalClock.config(text="{:02d}:{:02d}:{:02d} {}".format(self.drawClock_hours, self.drawClock_minutes, self.drawClock_second, self.display_ampm))
-        self.container.after(1000,self.clock)
+        self.clockFrame.after(1000,self.clock)
 
     def draw_markings(self):
         d = 100
@@ -779,6 +787,7 @@ class ReminderApp:
     def Clear_Sidebar_Frame(self):
         for widget in self.sidebar_Frame.winfo_children():
             widget.destroy()
+
 def reminder(): 
     app = ReminderApp()
     app.run()

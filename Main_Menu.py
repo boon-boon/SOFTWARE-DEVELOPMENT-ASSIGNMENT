@@ -20,11 +20,9 @@ class MainMenu:
         self.is_sidebar_expanded = False
         self.sidebar_min_width = 0
         self.sidebar_max_width = 250
-        self.animation_speed = 10
         # Create UI components
         self.create_ui()
         self.create_sidebar_content()
-        Expense_Tracker(self.content_frame,self.secondSidebar)
 
     def create_ui(self):
         # Top navigation frame
