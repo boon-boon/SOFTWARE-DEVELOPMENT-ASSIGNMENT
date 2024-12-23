@@ -1,8 +1,0 @@
-Food: 0.00
-Transport: 0.00
-Daily: 4000.00
-Housing: 0.00
-Utilities: 0.00
-Education: 0.00
-Entertaiment: 0.00
-Other: 0.00

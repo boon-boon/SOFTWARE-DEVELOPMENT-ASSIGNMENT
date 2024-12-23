@@ -12,17 +12,17 @@ class NotesOrganizer:
         self.FONT_SUB = ("Arial",12,"bold")
         self.FONT_BUTTON = ("Arial",10,"bold")
         self.FONT_BIG = ("Arial", 20, "bold")
-        self.File_Path = "Note_Data/Note.txt"
+        self.File_Path = "Note.txt"
         self.Edit_File = False
         self.image_file_location = 'None'
         
         self.container = container
         self.sidebar = sidebar
+        self.Check_Data()
         self.Clear_Sidebar_Frame()
         self.Main_Menu()
         self.Sidebar()
-        self.Check_Data()
-    
+ 
     def Main_Menu(self):
         self.Edit_File = False
         self.Clear_Frame()

@@ -730,7 +730,6 @@ class Expense_Tracker:
         for i in range(0,3):
             self.Total_Assets += self.income_Amount[i]
 
-
 #--------------------------------------------------------------
     def load_data_into_tree(self):
         for row in self.tree.get_children():
