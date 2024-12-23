@@ -40,7 +40,8 @@ class Expense_Tracker:
         
         #Array
         self.account_Type = ['Cash','E-wallet','Debit card','Bank']
-        self.expense_Category = ["Food", "Transport", "Daily Necesities", "Housing Expense", "Utilities", "Education", "Entertaiment", "Other"]
+        self.expense_Category = ["Food", "Transport", "Daily Necessities", "Housing Expense", "Utilities", "Education", "Entertaiment", "Other"]
+        self.expense_Category_Short = ["Food", "Transport", "Daily", "Housing", "Utilities", "Education", "Entertaiment", "Other"]
         self.income_Category = ["Income","Stock","Allowance","Other"]
         self.assetsLst = [" ", " ", " "," "," "," "]
         
@@ -122,17 +123,6 @@ class Expense_Tracker:
         #     bar_chart.place(x=300,y=10+(i*60))
         #     self.Animate_Bar_Chart(bar_chart,min=0,max=max_width)
         
-        #This is for assets page
-        #Print pie chart for expense
-        # fig=Figure(figsize=(5,5),dpi=100)
-        # fig.patch.set_facecolor(self.BG_COLOR)
-        # ax=fig.add_subplot(111)
-        # ax.pie(self.income_Amount, labels='    ',autopct='%1.1f%%', startangle=90,colors=self.bar_chart_bg)
-        
-        # canvas = FigureCanvasTkAgg(fig,master=self.Middle_Frame)
-        # canvas.draw()
-        # canvas.get_tk_widget().place(x=100,y=100)
-        
         #Print to show the total expense
         self.Load_Image('Expense_Tracker_Photo/Black_Rectangle1.png',1455,130)
         black_rectangle = Label(self.Middle_Frame,image=self.img,bg=self.BG_COLOR, fg='#D7D7D7', text="Total Expense\n\n\n",compound=CENTER,font=self.FONT_MAIN)
@@ -148,9 +138,8 @@ class Expense_Tracker:
                             font=("Cardium",24,"bold"))
         ttl_exp_amt.grid()
         
-        
         #Print the grey rounded rectangle behind the show expense history and pie chart
-        self.Load_Image("Expense_Tracker_Photo/Black_Rectangle2.png",1425,600)
+        self.Load_Image("Expense_Tracker_Photo/Black_Rectangle2.png",1455,600)
         center_Content_Rectangle = Label(self.Middle_Frame,image=self.img,bg=self.BG_COLOR)
         center_Content_Rectangle.image = self.img
         center_Content_Rectangle.place(x=15,y=155)
@@ -213,23 +202,35 @@ class Expense_Tracker:
         #Bind the right click with a funcion to print edit and delete
         self.tree.bind("<Button-3>", self.Right_Click)  
         
-        #Print pie chart for expense
-        z = 0
-        for i in range(len(self.top5_high_exp)): 
-            for j in range(len(self.expense_Amount)): 
-                if self.top5_high_exp[i] == self.expense_Amount[j]:
-                    self.top5_high_exp_type[z] = self.expense_Category[j]
-                    z += 1
-                    break
+        expense_category_not0 = []
+        expense_amount_not0 = []
         
-        self.top5_high_exp[4] = sum(self.top5_low_exp)
-        self.top5_high_exp_type[4] = 'Other'
+        for i in range(len(self.expense_Category_Short)):
+            key = self.expense_Category_Short[i]
+            value = self.expense_Amount_Dict.get(key)
+            if value != 0 and value != None:
+                expense_category_not0.append(key)
+                expense_amount_not0.append(value)
+            
+        #Print pie chart for expense
+                
+        
+        # z = 0
+        # for i in range(len(self.top5_high_exp)): 
+        #     for j in range(len(self.expense_Amount)): 
+        #         if self.top5_high_exp[i] == self.expense_Amount[j]:
+        #             self.top5_high_exp_type[z] = self.expense_Category[j]
+        #             z += 1
+        #             break
+        
+        # self.top5_high_exp[4] = sum(self.top5_low_exp)
+        # self.top5_high_exp_type[4] = 'Other'
         
         fig = Figure(figsize=(5,5), dpi=110) # Size of the pie chart
         fig.patch.set_facecolor(self.SIDEBAR_COLOR)
         ax = fig.add_subplot(111)
         # Array
-        ax.pie(self.top5_high_exp, labels=self.top5_high_exp_type,autopct='%1.1f%%', startangle=90)
+        ax.pie(expense_amount_not0, labels=expense_category_not0,autopct='%1.1f%%', startangle=90)
         for text in ax.texts:
             text.set_color('white')
             text.set_fontsize(10)
@@ -292,7 +293,7 @@ class Expense_Tracker:
         self.Load_Image(self.P_Black_Square,1500,400)
         print_Square_Bg = Label(self.Middle_Frame, image=self.img,bg=self.BG_COLOR)
         print_Square_Bg.image = self.img
-        print_Square_Bg.place(x=10,y=300)
+        print_Square_Bg.place(x=10,y=310)
         
         print_Account_Type = Label(self.Middle_Frame,text="Select account:",bg=self.SIDEBAR_COLOR,font=self.FONT_MAIN,fg='white')
         print_Account_Type.place(x=50,y=340)
@@ -328,7 +329,7 @@ class Expense_Tracker:
         money_Entry.insert(0, "0.00")
         money_Entry.bind("<FocusIn>",self.Expense_Money_Entry_Clear)
         money_Entry.bind("<FocusOut>",self.Expense_Money_Entry_Restore)
-        money_Entry.place(x=1400,y=290)
+        money_Entry.place(x=1375,y=290)
 
         #Create date to input date
         calendar = Calendar(self.Middle_Frame,
@@ -343,12 +344,12 @@ class Expense_Tracker:
                             normalforeground='white',
                             othermonthbackground=self.SIDEBAR_COLOR,
                             othermonthforeground="white",
-                            showothermonthdays=False,
                             font=self.FONT_SUB,
+                            showothermonthdays=False,
                             showweeknumbers=False,
                             date_pattern="dd/mm/yyyy"
                             )
-        calendar.place(x=1100,y=335,width=350,height=350)
+        calendar.place(x=1100,y=335,width=350,height=370)
         
         #Print the button to update the assets
         self.Load_Image(self.P_Blue_Rectangle,150,30)
@@ -375,7 +376,7 @@ class Expense_Tracker:
         self.Clear_Middle_Frame()        
             
         #Print a button to close the frame
-        print_Close_Button = Button(self.Middle_Frame,text="x",fg="white",bg=self.BG_COLOR,font=("Arial",20,"bold"),activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0,width=5,height=2,command=self.Create_Center_Content)
+        print_Close_Button = Button(self.Middle_Frame,text="x",fg="white",bg=self.BG_COLOR,font=("Arial",20,"bold"),activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0,width=3,height=1,command=self.Create_Center_Content)
         print_Close_Button.place(x=10,y=2)
         
         print_Expense= Button(self.Middle_Frame,text="Expense",fg="white",bg=self.BG_COLOR,font=self.FONT_SUB,activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0, command=self.Add_New_Bill)
@@ -410,7 +411,7 @@ class Expense_Tracker:
         self.Load_Image(self.P_Black_Square,1500,400)
         print_Square_Bg = Label(self.Middle_Frame, image=self.img,bg=self.BG_COLOR)
         print_Square_Bg.image = self.img
-        print_Square_Bg.place(x=10,y=300)
+        print_Square_Bg.place(x=10,y=310)
         
         print_Account_Type = Label(self.Middle_Frame,text="Select account:",bg=self.SIDEBAR_COLOR,font=self.FONT_MAIN,fg='white')
         print_Account_Type.place(x=50,y=340)
@@ -446,7 +447,7 @@ class Expense_Tracker:
         money_Entry.insert(0, "0.00")
         money_Entry.bind("<FocusIn>",self.Saving_Money_Entry_Clear)
         money_Entry.bind("<FocusOut>",self.Saving_Money_Entry_Restore)
-        money_Entry.place(x=1400,y=290)
+        money_Entry.place(x=1375,y=290)
 
         #Create date to input date
         calendar = Calendar(self.Middle_Frame,
@@ -486,9 +487,6 @@ class Expense_Tracker:
         )
         input_Income.image = self.img
         input_Income.place(x=1285,y=9)
-        
-        
-        
         
 
 #Call function at below
@@ -665,6 +663,7 @@ class Expense_Tracker:
 #--------------------------------------------------------------
     def Load_Expense_And_Income(self):
         self.expense_Amount = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        self.expense_Amount_Dict = {}
         self.top5_high_exp = [0.00,0.00,0.00,0.00,0.00]
         self.top5_low_exp = [0.00,0.00,0.00,0.00]
         self.total_Expense = 0
@@ -675,28 +674,37 @@ class Expense_Tracker:
         for line in lines:
             parts = line.split(":")
             if len(parts) == 2:
-                key = parts[0].strip().lower()
+                key = parts[0].strip()
                 value_str = parts[1].strip()
                 
                 value = float(value_str)
-                if key == 'food':
+                if key == 'Food':
+                    self.expense_Amount_Dict[key] = value
                     self.expense_Amount[0] = value
-                elif key == 'transport':
+                elif key == 'Transport':
+                    self.expense_Amount_Dict[key] = value
                     self.expense_Amount[1] = value
-                elif key == 'daily':
+                elif key == 'Daily':
+                    self.expense_Amount_Dict[key] = value
                     self.expense_Amount[2] = value
-                elif key == 'housing':
+                elif key == 'Housing':
+                    self.expense_Amount_Dict[key] = value
                     self.expense_Amount[3] = value
-                elif key == 'utilities':
+                elif key == 'Utilities':
+                    self.expense_Amount_Dict[key] = value
                     self.expense_Amount[4] = value
-                elif key == 'education':
+                elif key == 'Education':
+                    self.expense_Amount_Dict[key] = value
                     self.expense_Amount[5] = value
-                elif key == 'entertaiment':
+                elif key == 'Entertaiment':
+                    self.expense_Amount_Dict[key] = value
                     self.expense_Amount[6] = value
-                else:
+                elif key == 'Other':
+                    self.expense_Amount_Dict[key] = value
                     self.expense_Amount[7] = value
-                        
-        for i in range(0,7):
+                                  
+        
+        for i in range(0,8):
             self.total_Expense += self.expense_Amount[i]
     
         #Find the top5 highest expense
@@ -728,7 +736,7 @@ class Expense_Tracker:
                     self.income_Amount[3] = value
 
         #Calculate the total
-        for i in range(0,3):
+        for i in range(0,4):
             self.Total_Assets += self.income_Amount[i]
 
 
@@ -781,8 +789,14 @@ class Expense_Tracker:
     #Store the description, amount and date
     def Store_Assets2(self,description=None, amount=None, date=None,category=None):
         #Debug
-        if amount.isalpha() == 1 or self.ACTIVE_BUTTON1 == None or self.ACTIVE_BUTTON2 == None:
+        if amount.isalpha() == 1 or self.ACTIVE_BUTTON1 == None or self.ACTIVE_BUTTON2 == None and amount>0:
             messagebox.showerror("Error", "Please fill it correctly")
+            return
+        
+        amount = float(amount)
+        
+        if amount < 1:
+            messagebox.showerror("Error", "Please fill integer number")
             return
 
         #If no descripiton than print nothings into notepad
