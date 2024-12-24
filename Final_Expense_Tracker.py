@@ -52,9 +52,8 @@ class Expense_Tracker:
         #self.sidebar_Frame = sidebar
         self.window = container
 
-        # Initialize the UI
-        #self.Clear_Sidebar()
-        #self.Sidebar()
+        # self.Clear_Sidebar()
+        # self.Sidebar()
         self.Create_Center_Content()
 
 
@@ -1128,46 +1127,7 @@ class Expense_Tracker:
         self.Create_Center_Content()
         
         
-#--------------------------------------------------------------
-    def Sidebar(self):
-        # Create a sidebar frame
-        self.dsd = Frame(self.sidebar_Frame, bg='#2f3336',height=1080,width=250)
-        self.dsd.pack()
-        self.dsd.pack_propagate()
-        
-        # Define sidebar sections and their callbacks
-        main_Section = [
-            ("Home", "🏠"),
-            ("Income", "👛")
-        ]
-        
-        section_callbacks = {
-            "Home": self.Create_Center_Content,
-            "Income": self.Open_Assets_Page,
-        }
-        
-        # Create buttons for each section
-        for item_text, emoji in main_Section:
-            button = Button(
-                self.dsd,
-                text=f"{emoji}  {item_text}",
-                font=("Arial",18),
-                fg="white",
-                bg="#2f3336",
-                activebackground=self.ACTIVE_COLOUR,
-                activeforeground="white",
-                relief=FLAT,
-                anchor='w',
-                padx=15,
-                width=25,
-                pady=20,
-                borderwidth=0,
-                command=section_callbacks.get(item_text.strip())
-            )
-            button.pack(fill=X)
-            
 
-#--------------------------------------------------------------
     def Open_Assets_Page(self):
         # Clear and configure frames for the assets page
         self.top_Navigator.forget()
