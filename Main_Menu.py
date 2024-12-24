@@ -4,19 +4,19 @@ from Reminder import ReminderApp
 from Final_Expense_Tracker import Expense_Tracker
 from Note_Organizer import NotesOrganizer
 
-
-
-sidebarBg = "#1a1c1e"       
-topNavigationBg = "#1E1E1E" 
-containerBg = "#0D0D0D"    
+# Define color constants for UI styling
+sidebarBg = "#1a1c1e"           # Sidebar background color   
+topNavigationBg = "#1E1E1E"     # Top navigation background color
+containerBg = "#0D0D0D"         # Main content background color
 class MainMenu:
     def __init__(self):
-        # App configuration
+        # Initialize main application window
         self.window = Tk()
         self.window.title("Main Menu")
         self.window.geometry("1920x1080")
         self.window.configure(bg=sidebarBg)
 
+        # Sidebar expansion state and dimensions
         self.is_sidebar_expanded = False
         self.is_expense_expanded = False
         self.is_expense_rotated = False
@@ -188,6 +188,7 @@ class MainMenu:
         self.reminder_btn_indicator.config(bg=sidebarBg)
         self.note_btn_indicator.config(bg=sidebarBg)
 
+        # Highlight the selected indicator
         indication_lb.config(bg="white")
         
     def create_sidebar_content(self):
@@ -267,6 +268,7 @@ class MainMenu:
         self.btexpense_subpage_assets.pack(side=RIGHT)
 
 
+        # Reminder App button with an indicator
         self.reminder_btn_indicator = Label(
             self.sidebar,
             bg=sidebarBg
@@ -326,6 +328,7 @@ class MainMenu:
         )
         self.btreminder_subpage_home.pack(side=LEFT)
         
+        # Notes Organizer button with an indicator
         self.note_btn_indicator = Label(
             self.sidebar,
             bg=sidebarBg
@@ -344,7 +347,7 @@ class MainMenu:
             activebackground=sidebarBg,
             command=lambda: [self.switch_indication(self.note_btn_indicator),NotesOrganizer(self.content_frame)]
         )
-        btNote.place(x=15, y= 203)
+        btNote.place(x=15, y=203)
 
         self.btnote_subpage = Button(
             self.note_Lable_frame,
@@ -459,6 +462,7 @@ class MainMenu:
 
     
 def main():
+    """Entry point of the application"""
     app = MainMenu()
     app.run()
 
