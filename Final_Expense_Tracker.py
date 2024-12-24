@@ -82,7 +82,7 @@ class Expense_Tracker:
         #Create a button to create a new bill
         self.add_New_Bill = Button(
             self.top_Navigator,
-            text='+ Add a new bill',
+            text="Add New Expense",
             font=self.FONT_BUTTON,
             bg=self.SIDEBAR_COLOR,
             fg="white",
@@ -114,7 +114,7 @@ class Expense_Tracker:
         
         # Print total expense label and amount
         self.Load_Image('Expense_Tracker_Photo/Black_Rectangle1.png',1455,130)
-        black_rectangle = Label(self.Middle_Frame,image=self.img,bg=self.BG_COLOR, fg='#D7D7D7', text="Total Expense\n\n\n",compound=CENTER,font=self.FONT_MAIN)
+        black_rectangle = Label(self.Middle_Frame,image=self.img,bg=self.BG_COLOR, fg='#D7D7D7', text="Total Expenses\n\n\n",compound=CENTER,font=self.FONT_MAIN)
         black_rectangle.image = self.img
         black_rectangle.place(x=10,y=10)
         
@@ -160,23 +160,23 @@ class Expense_Tracker:
         self.tree = ttk.Treeview(
             print_exp_history_frame,
             style="Custom.Treeview",
-            columns = ('Date', 'Amount', 'Account', 'Category', 'Description'),
+            columns = ('Date', 'Amount', 'Payment Method', 'Category', 'Remarks'),
             show = 'headings',
         )
         
         # Treeview column headers
         self.tree.heading('Date', text='Date')
         self.tree.heading('Amount', text='Amount')
-        self.tree.heading('Account', text='Account')
+        self.tree.heading('Payment Method', text='Payment Method')
         self.tree.heading('Category', text='Category')
-        self.tree.heading('Description', text='Description')
+        self.tree.heading('Remarks', text='Remarks')
         
         # Treeview column settings
         self.tree.column('Date', anchor=CENTER, width=25)
         self.tree.column('Amount', anchor=CENTER, width=30)
-        self.tree.column('Account', anchor=CENTER, width=5)
+        self.tree.column('Payment Method', anchor=CENTER, width=5)
         self.tree.column('Category', anchor=CENTER, width=75)
-        self.tree.column('Description', anchor=CENTER, width=150)
+        self.tree.column('Remarks', anchor=CENTER, width=150)
         self.tree.pack(expand=True, fill=BOTH)
         
         # Scrollbar and mouse wheel interaction
@@ -222,8 +222,8 @@ class Expense_Tracker:
         print_Expense_History = Label(self.Middle_Frame,text="Expense History", font=self.FONT_BIG, bg=self.SIDEBAR_COLOR,fg='white')
         print_Expense_History.place(x=50,y=190)
         
-        print_Top5_Exp = Label(self.Middle_Frame,text="Top Expenses", font=self.FONT_BIG, bg=self.SIDEBAR_COLOR,fg='white')
-        print_Top5_Exp.place(x=1060,y=190)
+        print_Top5_Exp = Label(self.Middle_Frame,text="Expense Breakdown", font=self.FONT_BIG, bg=self.SIDEBAR_COLOR,fg='white')
+        print_Top5_Exp.place(x=1030,y=190)
 
 
 #--------------------------------------------------------------
@@ -235,6 +235,9 @@ class Expense_Tracker:
         # Button to close or navigate back
         print_Close_Button = Button(self.Middle_Frame,text="x",fg="white",bg=self.BG_COLOR,font=("Arial",20,"bold"),activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0,width=3,height=1,command=self.Create_Center_Content)
         print_Close_Button.place(x=10,y=2)
+
+        show_Choose_Expense_Category = Label(self.Middle_Frame, fg="white",bg=self.BG_COLOR,font=("Arial",12,"bold"), text="Choose Expense Category:")
+        show_Choose_Expense_Category.place(x=100,y=60)
         
         # Buttons for Expense and Income types
         print_Expense= Button(self.Middle_Frame,text="Expense",fg="#E73D41",bg=self.BG_COLOR,font=self.FONT_SUB,activebackground=self.ACTIVE_COLOUR,activeforeground="#E73D41",borderwidth=0)
@@ -252,33 +255,27 @@ class Expense_Tracker:
                 self.Middle_Frame,
                 text = f"{self.expense_Category[i]}",
                 font=("Arial",14,"bold"),
-                bg=self.BG_COLOR,
+                bg=self.SIDEBAR_COLOR,
                 fg="white",
                 image=self.img,
                 compound=TOP,
                 relief=FLAT,
                 activebackground=self.SIDEBAR_COLOR,
                 activeforeground='white',
-                width=300,
-                height=125,
+                width=200,
+                height=100,
                 borderwidth=0,
                 )
             expense_button.image=self.img
             if i > 3:
-                expense_button.place(x=10+(j*350),y=150)
+                expense_button.place(x=100+(j*300),y=210)
                 j+=1
             else:
-                expense_button.place(x=10+(i*350),y=40)
+                expense_button.place(x=100+(i*300),y=100)
             expense_button.config(command=lambda button=expense_button, ic=self.expense_Category[i]: [self.Highlight_Button1(button),self.Store_Assets1(category=ic)])
         
-        # Black square background for account selection
-        self.Load_Image(self.P_Black_Square,1500,400)
-        print_Square_Bg = Label(self.Middle_Frame, image=self.img,bg=self.BG_COLOR)
-        print_Square_Bg.image = self.img
-        print_Square_Bg.place(x=10,y=310)
-        
         # Account selection labels
-        print_Account_Type = Label(self.Middle_Frame,text="Select account:",bg=self.SIDEBAR_COLOR,font=self.FONT_MAIN,fg='white')
+        print_Account_Type = Label(self.Middle_Frame,text="Select Payment Method:",bg=self.BG_COLOR,font=self.FONT_MAIN,fg='white')
         print_Account_Type.place(x=50,y=340)
         
         for i in range(0,4):
@@ -297,22 +294,31 @@ class Expense_Tracker:
                                   anchor='w'
                                   )
             account_Label.image = self.img
-            account_Label.place(x=40,y=390+(i*80))
+            account_Label.place(x=40,y=380+(i*80))
             account_Label.config(command=lambda button=account_Label,x=self.account_Type[i]: [self.Highlight_Button2(button),self.Store_Assets1(account= x)])
         
+        show_Enter_Description = Label(self.Middle_Frame, bg=self.BG_COLOR, fg='white', font = self.FONT_MAIN, text='Enter Expenses Remark:')
+        show_Enter_Description.place(x=730,y=400)
+
         # Create entry to enter description
-        description_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='white',borderwidth=0,font=self.FONT_MAIN,width=100,insertbackground='#4C9FFA')
+        description_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='grey',borderwidth=0,font=self.FONT_MAIN,insertbackground='white')
         description_Entry.insert(0, "Description")
         description_Entry.bind("<FocusIn>",self.Saving_Description_Entry_Clear)
         description_Entry.bind("<FocusOut>",self.Saving_Description_Entry_Restore)
-        description_Entry.place(x=60,y=290)
+        description_Entry.place(x=990,y=403)
         
+        show_Enter_Expense = Label(self.Middle_Frame, bg=self.BG_COLOR,fg='white',borderwidth=0,font=self.FONT_MAIN, text="Enter Expense Amount:")
+        show_Enter_Expense.place(x=740, y=500)
+
         # Create entry to input amount
-        money_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='#F5494D',borderwidth=0,font=self.FONT_MAIN,width=100,insertbackground='#F5494D')
+        money_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='#F5494D',borderwidth=0,font=self.FONT_MAIN, insertbackground='#F5494D')
         money_Entry.insert(0, "0.00")
         money_Entry.bind("<FocusIn>",self.Expense_Money_Entry_Clear)
         money_Entry.bind("<FocusOut>",self.Expense_Money_Entry_Restore)
-        money_Entry.place(x=1375,y=290)
+        money_Entry.place(x=990,y=500)
+
+        show_Enter_Date = Label(self.Middle_Frame,bg=self.BG_COLOR,fg='white',font=self.FONT_MAIN, text="Choose Date:")
+        show_Enter_Date.place(x=350, y=340)
 
         #Create date to input date
         calendar = Calendar(self.Middle_Frame,
@@ -332,7 +338,7 @@ class Expense_Tracker:
                             showweeknumbers=False,
                             date_pattern="dd/mm/yyyy"
                             )
-        calendar.place(x=1100,y=335,width=350,height=370)
+        calendar.place(x=350,y=375,width=350,height=330)
         
         #Print the button to update the assets
         self.Load_Image(self.P_Blue_Rectangle,150,30)
@@ -340,7 +346,7 @@ class Expense_Tracker:
         # Create button to update assets (Expense)
         input_Expense = Button(
             self.Middle_Frame,
-            text="Update assets",
+            text="Update Expense",
             font=self.FONT_BUTTON,
             bg=self.BG_COLOR,
             fg='white',
@@ -358,12 +364,14 @@ class Expense_Tracker:
 #--------------------------------------------------------------        
     # Function to add income
     def Add_Income(self):
-        
         self.Clear_Middle_Frame()   # Clear current content on the middle frame   
             
         # Close button for the frame
         print_Close_Button = Button(self.Middle_Frame,text="x",fg="white",bg=self.BG_COLOR,font=("Arial",20,"bold"),activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0,width=3,height=1,command=self.Create_Center_Content)
         print_Close_Button.place(x=10,y=2)
+        
+        show_Choose_Income_Category = Label(self.Middle_Frame, fg="white",bg=self.BG_COLOR,font=("Arial",12,"bold"), text="Choose Income Category:")
+        show_Choose_Income_Category.place(x=80,y=90)
         
         # Button to switch to "Expense" section
         print_Expense= Button(self.Middle_Frame,text="Expense",fg="white",bg=self.BG_COLOR,font=self.FONT_SUB,activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0, command=self.Add_New_Bill)
@@ -381,7 +389,7 @@ class Expense_Tracker:
                 self.Middle_Frame,
                 text=f"{self.income_Category[i]}",
                 font=("Arial",14,"bold"),
-                bg=self.BG_COLOR,
+                bg=self.SIDEBAR_COLOR,
                 fg="white",
                 image=self.img,
                 compound=TOP,
@@ -389,21 +397,17 @@ class Expense_Tracker:
                 activebackground=self.SIDEBAR_COLOR,
                 activeforeground='white',
                 width=300,
-                height=125,
+                height=105,
                 borderwidth=0
             )
             income_button.image = self.img
-            income_button.place(x=10+(i*350),y=60)
+            income_button.place(x=75+(i*350),y=150)
             income_button.config(command=lambda ic=self.income_Category[i], bt=income_button: [self.Store_Assets1(category=ic),self.Highlight_Button1(bt)])
         
         # Create background square for account selection
-        self.Load_Image(self.P_Black_Square,1500,400)
-        print_Square_Bg = Label(self.Middle_Frame, image=self.img,bg=self.BG_COLOR)
-        print_Square_Bg.image = self.img
-        print_Square_Bg.place(x=10,y=310)
         
         # Label for account type selection
-        print_Account_Type = Label(self.Middle_Frame,text="Select account:",bg=self.SIDEBAR_COLOR,font=self.FONT_MAIN,fg='white')
+        print_Account_Type = Label(self.Middle_Frame,text="Select Payment Method:",bg=self.BG_COLOR,font=self.FONT_MAIN,fg='white')
         print_Account_Type.place(x=50,y=340)
         
         # Loop to display account type buttons
@@ -423,22 +427,31 @@ class Expense_Tracker:
                                   anchor='w'
                                   )
             account_Label.image = self.img
-            account_Label.place(x=40,y=390+(i*80))  # Position dynamically
+            account_Label.place(x=40,y=380+(i*80))  # Position dynamically
             account_Label.config(command=lambda button=account_Label,x=self.account_Type[i]: [self.Highlight_Button2(button),self.Store_Assets1(account= x)])   # Store account data when clicked
 
+        show_Income_Description = Label(self.Middle_Frame, bg=self.BG_COLOR, fg='white', font = self.FONT_MAIN, text='Enter Income Remark:')
+        show_Income_Description.place(x=730,y=400)
+
         # Create entry to enter description
-        description_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='white',borderwidth=0,font=self.FONT_MAIN,width=100,insertbackground='#4C9FFA')
+        description_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='grey',borderwidth=0,font=self.FONT_MAIN, insertbackground='white')
         description_Entry.insert(0, "Description")
         description_Entry.bind("<FocusIn>",self.Saving_Description_Entry_Clear)
         description_Entry.bind("<FocusOut>",self.Saving_Description_Entry_Restore)
-        description_Entry.place(x=60,y=290)
+        description_Entry.place(x=965,y=403)
         
+        show_Enter_Income = Label(self.Middle_Frame, bg=self.BG_COLOR,fg='white',borderwidth=0,font=self.FONT_MAIN, text="Enter Income Amount:")
+        show_Enter_Income.place(x=740, y=500)
+
         # Create entry to input amount
-        money_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='#3DD393',borderwidth=0,font=self.FONT_MAIN,width=100,insertbackground='#3DD393')
+        money_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='#3DD393',borderwidth=0,font=self.FONT_MAIN, insertbackground='#3DD393')
         money_Entry.insert(0, "0.00")
         money_Entry.bind("<FocusIn>",self.Saving_Money_Entry_Clear)
         money_Entry.bind("<FocusOut>",self.Saving_Money_Entry_Restore)
-        money_Entry.place(x=1375,y=290)
+        money_Entry.place(x=980,y=500)
+
+        show_Enter_Date = Label(self.Middle_Frame,bg=self.BG_COLOR,fg='white',font=self.FONT_MAIN, text="Choose Date:")
+        show_Enter_Date.place(x=350, y=340)
 
         # Create calendar to input date
         calendar = Calendar(self.Middle_Frame,
@@ -458,7 +471,7 @@ class Expense_Tracker:
                             showweeknumbers=False,
                             date_pattern="dd/mm/yyyy" 
                             )
-        calendar.place(x=1100,y=335,width=350,height=350)
+        calendar.place(x=350,y=375,width=350,height=300)
         
         #Print the button to update the assets
         self.Load_Image(self.P_Blue_Rectangle,150,30)
@@ -466,7 +479,7 @@ class Expense_Tracker:
         # Button to update assets (Income)
         input_Income = Button(
             self.Middle_Frame,
-            text="Update assets",
+            text="Update Assets",
             font=self.FONT_BUTTON,
             bg=self.BG_COLOR,
             fg='white',
@@ -598,7 +611,7 @@ class Expense_Tracker:
         widget = event.widget
         if widget.get() == "Description":
             widget.delete(0,END)
-            widget.config(fg="white")
+            widget.config(fg="grey")
     
     
 #--------------------------------------------------------------
@@ -607,7 +620,7 @@ class Expense_Tracker:
         widget = event.widget
         if not widget.get():
             widget.insert(0, "Description")
-            widget.config(fg='white')
+            widget.config(fg='grey')
     
     
 #--------------------------------------------------------------   
@@ -650,7 +663,7 @@ class Expense_Tracker:
     # Highlight Button1 and reset the previously active button  
     def Highlight_Button1(self, new_Button1):
         if self.ACTIVE_BUTTON1 is not None:
-            self.ACTIVE_BUTTON1.config(bg=self.BG_COLOR)
+            self.ACTIVE_BUTTON1.config(bg=self.SIDEBAR_COLOR)
         new_Button1.config(bg="#454545") 
         self.ACTIVE_BUTTON1 = new_Button1
 
