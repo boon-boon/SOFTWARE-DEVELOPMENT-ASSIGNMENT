@@ -12,7 +12,7 @@ import time
 
 class Expense_Tracker:
 #--------------------------------------------------------------
-    def __init__(self, container,sidebar):
+    def __init__(self, container):
         #Basic initialize
         self.BG_COLOR = "#181818"
         self.SIDEBAR_COLOR = "#212121"
@@ -54,11 +54,10 @@ class Expense_Tracker:
         self.bar_chart_bg = ["#FD663F", "#FDA93D", "#27C384", "#4289FF", "#92D66B", "#01A9F4", "#8C9EFF", "#FC65D5"]
         
         #-----------------------------------------------------------------------------
-        self.sidebar_Frame = sidebar
         self.window = container
 
-        self.Clear_Sidebar()
-        self.Sidebar()
+        # self.Clear_Sidebar()
+        # self.Sidebar()
         self.Create_Center_Content()
 
 
@@ -1092,43 +1091,7 @@ class Expense_Tracker:
         self.Create_Center_Content()
         
         
-#--------------------------------------------------------------
-    def Sidebar(self):
-        self.dsd = Frame(self.sidebar_Frame, bg='#2f3336',height=1080,width=250)
-        self.dsd.pack()
-        self.dsd.pack_propagate()
-        
-        main_Section = [
-            ("Home", "🏠"),
-            ("Assets", "👛")
-        ]
-        
-        section_callbacks = {
-            "Home": self.Create_Center_Content,
-            "Assets": self.Open_Assets_Page,
-        }
-        
-        for item_text, emoji in main_Section:
-            button = Button(
-                self.dsd,
-                text=f"{emoji}  {item_text}",
-                font=("Arial",18),
-                fg="white",
-                bg="#2f3336",
-                activebackground=self.ACTIVE_COLOUR,
-                activeforeground="white",
-                relief=FLAT,
-                anchor='w',
-                padx=15,
-                width=25,
-                pady=20,
-                borderwidth=0,
-                command=section_callbacks.get(item_text.strip())
-            )
-            button.pack(fill=X)
-            
 
-#--------------------------------------------------------------
     def Open_Assets_Page(self):
         # self.Clear_Full_Frame()
         self.top_Navigator.forget()

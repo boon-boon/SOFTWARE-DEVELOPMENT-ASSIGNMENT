@@ -19,12 +19,9 @@ sidebarBg = "#1a1c1e"
 textbg = "#212121" 
 
 class ReminderApp:
-    def __init__(self, container,sidebar):
+    def __init__(self, container):
         self.container = container
-        self.sidebar_Frame = sidebar
         self.clearFrame(self.container)
-        self.Clear_Sidebar_Frame()
-        self.print_sidebar()
 
         navigationFrame = Frame(
             self.container,
@@ -491,7 +488,7 @@ class ReminderApp:
         self.update_data = ""
 
         for i in range(self.reminderListRow):
-            if (str(self.reminderList[i][2]) == self.current_date_updated and str(self.reminderList[i][3]) == self.current_time_updated and self.reminderList[i][5]=="inactive"):
+            if self.isCheckboxTick_type and (str(self.reminderList[i][2]) == self.current_date_updated and str(self.reminderList[i][3]) == self.current_time_updated and self.reminderList[i][5]=="inactive"):
                 notification.notify(
                     title=self.reminderList[i][0],
                     message=self.reminderList[i][1],
@@ -501,7 +498,7 @@ class ReminderApp:
                     timeout=10
                 )
                 self.reminderList[i][5] = "active"
-            elif (str(self.reminderList[i][2]) == self.current_date_updated) and self.reminderList[i][5]=="inactive":
+            elif not self.isCheckboxTick_type and (str(self.reminderList[i][2]) == self.current_date_updated) and self.reminderList[i][5]=="inactive":
                 notification.notify(
                     title=self.reminderList[i][0],
                     message=self.reminderList[i][1],
@@ -761,32 +758,6 @@ class ReminderApp:
         width=thickness
     )
         
-    def print_sidebar(self):
-        self.dsd = Frame(self.sidebar_Frame, bg='#2f3336',height=1080,width=250)
-        self.dsd.pack()
-        self.dsd.pack_propagate()
-        
-        button = Button(
-            self.dsd,
-            text="🏠  Home",
-            font=("Arial",18),
-            fg="white",
-            bg="#2f3336",
-            activebackground=textbg,
-            activeforeground="white",
-            relief=FLAT,
-            anchor='w',
-            padx=15,
-            width=25,
-            pady=20,
-            borderwidth=0,
-            command= lambda: ReminderApp()
-        )
-        button.pack(fill=X)
-
-    def Clear_Sidebar_Frame(self):
-        for widget in self.sidebar_Frame.winfo_children():
-            widget.destroy()
 
 def reminder(): 
     app = ReminderApp()

@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 import os
 
 class NotesOrganizer:
-    def __init__(self, container, sidebar):
+    def __init__(self, container):
         self.BG_COLOR = "#181818"
         self.SIDEBAR_COLOR = "#212121"
         self.ACTIVE_COLOUR = "#383838"
@@ -17,11 +17,8 @@ class NotesOrganizer:
         self.image_file_location = 'None'
         
         self.container = container
-        self.sidebar = sidebar
         self.Check_Note()
-        self.Clear_Sidebar_Frame()
         self.Main_Menu()
-        self.Sidebar()
  
     def Main_Menu(self):
         self.Edit_File = False
@@ -328,43 +325,8 @@ class NotesOrganizer:
             self.tag_text_box.insert(tk.END, self.values[1])
             self.note_text_box.insert(tk.END, self.values[2]) 
 
-    def Sidebar(self):
-        self.sidebar_Frame = tk.Frame(self.sidebar, bg="#2f3336", height=1080,width=250)
-        self.sidebar_Frame.pack()
-        self.sidebar_Frame.pack_propagate(False)
-        
-        main_Section = [
-            ("Home", "🏠")
-        ]
-        
-        dictionary = {"Home": self.Main_Menu
-                      }
-    
-        for item_text, emoji in main_Section:
-            button = tk.Button(
-                self.sidebar_Frame,
-                text=f"{emoji}  {item_text}",
-                font=("Arial",18),
-                fg="white",
-                bg="#2f3336",
-                activebackground='#383838',
-                activeforeground="white",
-                relief=tk.FLAT,
-                anchor='w',
-                padx=15,
-                width=25,
-                pady=20,
-                borderwidth=0,
-                command = dictionary.get(item_text)
-            )
-            button.pack(fill=tk.X)
-
     def Clear_Frame(self):
         for widget in self.container.winfo_children():
-            widget.destroy()
-
-    def Clear_Sidebar_Frame(self):
-        for widget in self.sidebar.winfo_children():
             widget.destroy()
 
     def Mouse_Scroll(self,event):
