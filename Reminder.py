@@ -709,14 +709,14 @@ class ReminderApp:
         self.drawClock_minutes = int(self.curr_time[2]) * 10 + int(self.curr_time[3])
         self.drawClock_hours = int(self.curr_time[0]) * 10 + int(self.curr_time[1])
         # Draw arcs
-        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 200, 0, self.drawClock_second * 6, 11, "green")
-        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 180, 0, self.drawClock_minutes * 6, 11, "blue")
-        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 160, 0, self.drawClock_hours * 30, 11, "red")
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 200, 0, self.drawClock_second * 6, 11, "#BCA34B" )
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 180, 0, self.drawClock_minutes * 6, 11, "#BC744B")
+        self.arc((self.clockScreen_width // 2, self.clockScreen_height // 2), 160, 0, self.drawClock_hours * 30, 11, "#37567B")
 
         # Draw clock hands
-        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 140, self.drawClock_second * 6, 5, "green")
-        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 120, self.drawClock_minutes * 6, 5, "blue")
-        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 100, self.drawClock_hours * 30, 5, "red")
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 140, self.drawClock_second * 6, 5,"#BCA34B")
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 120, self.drawClock_minutes * 6, 5, "#BC744B")
+        self.clock_hand((self.clockScreen_width // 2, self.clockScreen_height // 2), 100, self.drawClock_hours * 30, 5, "#37567B")
         self.digitalClock.config(text="{:02d}:{:02d}:{:02d} {}".format(self.drawClock_hours, self.drawClock_minutes, self.drawClock_second, self.display_ampm))
         self.clockFrame.after(1000,self.clock)
 
