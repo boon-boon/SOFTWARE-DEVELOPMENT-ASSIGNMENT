@@ -35,7 +35,7 @@ class ReminderApp:
         self.add_icon = ImageTk.PhotoImage(self.add_icon)
         btAdd = Button(
             navigationFrame,
-            text="ADD NEW REMINDER",
+            text="Add New Reminder",
             fg="white",
             font=("Times", 12, "bold"),
             compound=CENTER,
@@ -49,7 +49,7 @@ class ReminderApp:
 
         lbReminder = Label(
             navigationFrame,
-            text="REMINDER",
+            text="Reminder",
             fg="white",
             font=("Times", 20, "bold"),
             bg=containerBg,
@@ -488,7 +488,7 @@ class ReminderApp:
         self.update_data = ""
 
         for i in range(self.reminderListRow):
-            if self.isCheckboxTick_type and (str(self.reminderList[i][2]) == self.current_date_updated and str(self.reminderList[i][3]) == self.current_time_updated and self.reminderList[i][5]=="inactive"):
+            if self.isCheckboxTick_type and (str(self.reminderList[i][2]) == self.current_date_updated and str(self.reminderList[i][3]) == self.current_time_updated and self.reminderList[i][5]=="Inactive"):
                 notification.notify(
                     title=self.reminderList[i][0],
                     message=self.reminderList[i][1],
@@ -497,8 +497,8 @@ class ReminderApp:
                     toast=True,
                     timeout=10
                 )
-                self.reminderList[i][5] = "active"
-            elif not self.isCheckboxTick_type and (str(self.reminderList[i][2]) == self.current_date_updated) and self.reminderList[i][5]=="inactive":
+                self.reminderList[i][5] = "Active"
+            elif not self.isCheckboxTick_type and (str(self.reminderList[i][2]) == self.current_date_updated) and self.reminderList[i][5]=="Inactive":
                 notification.notify(
                     title=self.reminderList[i][0],
                     message=self.reminderList[i][1],
@@ -507,7 +507,7 @@ class ReminderApp:
                     toast=True,
                     timeout=10
                 )
-                self.reminderList[i][5] = "active"
+                self.reminderList[i][5] = "Active"
 
         with open("Reminder_Data_Record.txt", 'w') as file:
             for i in range(self.reminderListRow):
@@ -556,9 +556,9 @@ class ReminderApp:
     def savedata(self):
         match self.isCheckboxTick_type :
             case 1:
-                data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | inactive\n\n"
+                data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME | {"{:02d}:{:02d} {}".format(*self.selected_time)} \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | Inactive\n\n"
             case 0:
-                data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME |  \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | inactive\n\n"
+                data = f"TITLE | {self.title} \nDESCRIPTION | {self.description} \nDATE | {self.date} \nTIME |  \nRECURRENCE TYPE | {self.recurrence_type}\nSTATUS | Inactive\n\n"
         with open("Reminder_Data_Record.txt", 'a') as file:
             file.write(data)
         file.close()
