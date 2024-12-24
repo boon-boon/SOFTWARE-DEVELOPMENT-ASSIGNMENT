@@ -112,15 +112,6 @@ class MainMenu:
         self.reminder_Lable_frame.pack()
         self.reminder_Lable_frame.pack_propagate(False)
 
-        self.reminder_subpage_contentFrame= Frame(
-            self.reminder_subpage_frame,
-            width = 300,
-            height = 25,
-            bg=sidebarBg
-        )
-        self.reminder_subpage_contentFrame.pack(side=LEFT,anchor=NW,padx=10)
-        self.reminder_subpage_contentFrame.pack_propagate(False)
-
         self.note_subpage_frame = Frame(
             self.sidebar,
             width = 280,
@@ -138,15 +129,6 @@ class MainMenu:
         )
         self.note_Lable_frame.pack()
         self.note_Lable_frame.pack_propagate(False)
-
-        self.note_subpage_contentFrame= Frame(
-            self.note_subpage_frame,
-            width = 300,
-            height = 25,
-            bg=sidebarBg
-        )
-        self.note_subpage_contentFrame.pack(side=LEFT,anchor=NW,padx=10)
-        self.note_subpage_contentFrame.pack_propagate(False)
         
 
 
@@ -224,7 +206,7 @@ class MainMenu:
             bg=sidebarBg,
             activebackground=sidebarBg,
             bd=0,
-            command= lambda : [self.animate_subpage(frame=self.expense_subpage_frame,max_height=self.expense_subpage_max_height,min_height=self.expense_subpage_min_height,frame_status=self.is_expense_expanded),self.rotate_arrow(frame = self.expense_Lable_frame,icon_status = self.is_expense_rotated ,label = self.downIconExpense,iconPath='icon/down.png')]
+            command= lambda : [self.animate_subpage(),self.rotate_arrow()]
         )
         self.btexpense_subpage.pack(side= LEFT,anchor=NW)
 
@@ -299,34 +281,8 @@ class MainMenu:
             bg=sidebarBg,
             activebackground=sidebarBg,
             bd=0,
-            command= lambda : [self.animate_subpage(frame=self.reminder_subpage_frame,max_height=self.reminder_subpage_max_height,min_height=self.reminder_subpage_min_height,frame_status=self.is_reminder_expanded),self.rotate_arrow(frame = self.reminder_Lable_frame,icon_status = self.is_reminder_rotated ,label = self.downIconReminder,iconPath='icon/down.png')]
-
         )
         self.btreminder_subpage.pack(side= LEFT,anchor=NW)
-
-        self.downreminder_icon = Image.open('icon/down.png')
-        self.downreminder_icon = self.downreminder_icon.resize((30,30))
-        self.downreminder_icon = ImageTk.PhotoImage(self.downreminder_icon)
-
-        self.downIconReminder = Label(
-            self.reminder_Lable_frame,
-            image=self.downreminder_icon,
-            bg=sidebarBg,
-        )
-        self.downIconReminder.pack(side=LEFT,anchor=NW,pady=10)
-
-        self.btreminder_subpage_home = Button(
-            self.reminder_subpage_contentFrame,
-            text="🏠  Home",
-            font=("Arial",15),
-            fg="white",
-            bg=sidebarBg,
-            activebackground=sidebarBg,
-            activeforeground=sidebarBg,
-            command=lambda:ReminderApp(container = self.content_frame),
-            bd=0
-        )
-        self.btreminder_subpage_home.pack(side=LEFT)
         
         # Notes Organizer button with an indicator
         self.note_btn_indicator = Label(
@@ -358,34 +314,10 @@ class MainMenu:
             bg=sidebarBg,
             activebackground=sidebarBg,
             bd=0,
-            command= lambda : [self.animate_subpage(frame=self.note_subpage_frame,max_height=self.note_subpage_max_height,min_height=self.note_subpage_min_height,frame_status=self.is_note_expanded),self.rotate_arrow(frame = self.note_Lable_frame,icon_status = self.is_note_rotated ,label = self.downIconNote,iconPath='icon/down.png')]
-
         )
         self.btnote_subpage.pack(side= LEFT,anchor=NW)
 
-        self.downnote_icon = Image.open('icon/down.png')
-        self.downnote_icon = self.downnote_icon.resize((30,30))
-        self.downnote_icon = ImageTk.PhotoImage(self.downnote_icon)
 
-        self.downIconNote = Label(
-            self.note_Lable_frame,
-            image=self.downnote_icon,
-            bg=sidebarBg,
-        )
-        self.downIconNote.pack(side=LEFT,anchor=NW,pady=10)
-
-        self.btnote_subpage_home = Button(
-            self.note_subpage_contentFrame,
-            text="🏠  Home",
-            font=("Arial",15),
-            fg="white",
-            bg=sidebarBg,
-            activebackground=sidebarBg,
-            activeforeground=sidebarBg,
-            command=lambda:NotesOrganizer(self.content_frame),
-            bd=0
-        )
-        self.btnote_subpage_home.pack(side=LEFT)
 
     def animate_sidebar(self):
         """Smooth sidebar animation"""
@@ -394,9 +326,6 @@ class MainMenu:
             for width in range(self.sidebar_min_width, self.sidebar_max_width + 1, 10):
                 self.sidebar.config(width=width)
                 self.window.update()
-            # for width in range(self.secondSidebar_min_width, self.secondSidebar_max_width + 1, 10):
-            #     self.secondSidebar.config(width=width)
-            #     self.window.update()
             self.is_sidebar_expanded = True
         else:
             # Collapse sidebar
@@ -404,54 +333,38 @@ class MainMenu:
                 self.sidebar.config(width=width)
                 self.window.update()
 
-            # for width in range(self.secondSidebar_max_width, self.secondSidebar_min_width - 1, -10):
-            #     self.secondSidebar.config(width=width)
-            #     self.window.update()
             self.is_sidebar_expanded = False
     
-    def animate_subpage(self,frame,max_height,min_height,frame_status):
-        if not frame_status:
-            for height in range(min_height, max_height + 1, 10):
-                frame.config(height=height)
-                frame.update()
+    def animate_subpage(self):
+        if not self.is_expense_expanded:
+            for height in range(self.expense_subpage_min_height,self.expense_subpage_max_height + 1, 10):
+                self.expense_subpage_frame.config(height=height)
+                self.expense_subpage_frame.update()
+            self.is_expense_expanded = True
         else:
-            for height in range(max_height,min_height - 1, -10):
-                frame.config(height=height)
-                frame.update()
-        
-        match frame:
-            case self.expense_subpage_frame:
-                self.is_expense_expanded= not self.is_expense_expanded
-            case self.reminder_subpage_frame:
-                self.is_reminder_expanded = not self.is_reminder_expanded
-            case self.note_subpage_frame:
-                self.is_note_expanded = not self.is_note_expanded
-            case _:
-                pass
+            for height in range(self.expense_subpage_max_height,self.expense_subpage_min_height - 1, -10):
+                self.expense_subpage_frame.config(height=height)
+                self.expense_subpage_frame.update()
+            self.is_expense_expanded = False
+
     
-    def rotate_arrow(self,frame,icon_status,label,iconPath):
-        icon = Image.open(iconPath)
+
+
+    def rotate_arrow(self):
+        icon = Image.open('icon/down.png')
         icon = icon.resize((30,30))
         
-        if not icon_status:
+        if not self.is_expense_rotated:
             self.rotated_icon = icon.rotate(angle=180)
+            self.is_expense_rotated = True
         else:
             self.rotated_icon = icon
-        
-        match frame:
-            case self.expense_Lable_frame:
-                self.is_expense_rotated= not self.is_expense_rotated
-            case self.reminder_Lable_frame:
-                self.is_reminder_rotated = not self.is_reminder_rotated
-            case self.note_Lable_frame:
-                self.is_note_rotated = not self.is_note_rotated
-            case _:
-                pass
-        
+            self.is_expense_rotated =False
+
         self.update_icon = ImageTk.PhotoImage(self.rotated_icon)
-        label.config(image=self.update_icon)
-        label.image = self.update_icon  
-        frame.update()
+        self.downIconExpense.config(image=self.update_icon)
+        self.downIconExpense.image = self.update_icon  
+        self.expense_Lable_frame.update()
 
     def run(self):
         self.window.mainloop()
