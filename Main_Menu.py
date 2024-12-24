@@ -4,22 +4,23 @@ from Reminder import ReminderApp
 from Final_Expense_Tracker import Expense_Tracker
 from Note_Organizer import NotesOrganizer
 
-
-
-sidebarBg = "#1a1c1e"       
-topNavigationBg = "#1E1E1E" 
-containerBg = "#0D0D0D"    
+# Define color constants for UI styling
+sidebarBg = "#1a1c1e"           # Sidebar background color   
+topNavigationBg = "#1E1E1E"     # Top navigation background color
+containerBg = "#0D0D0D"         # Main content background color
 class MainMenu:
     def __init__(self):
-        # App configuration
+        # Initialize main application window
         self.window = Tk()
         self.window.title("Main Menu")
         self.window.geometry("1920x1080")
         self.window.configure(bg=sidebarBg)
 
+        # Sidebar expansion state and dimensions
         self.is_sidebar_expanded = False
         self.sidebar_min_width = 0
         self.sidebar_max_width = 250
+        
         # Create UI components
         self.create_ui()
         self.create_sidebar_content()
@@ -54,6 +55,7 @@ class MainMenu:
         self.content_frame.pack(side=RIGHT, fill=BOTH)
         self.content_frame.pack_propagate(False)
 
+        # Second sidebar
         self.secondSidebar = Frame(
                 self.window, 
                 width=self.sidebar_min_width, 
@@ -62,7 +64,7 @@ class MainMenu:
         )
         self.secondSidebar.place(x=70,y=70)
         self.secondSidebar.pack_propagate(False)
-
+        
         # Create buttons
         self.create_buttons()
 
@@ -101,6 +103,7 @@ class MainMenu:
         self.reminder_btn_indicator.config(bg=sidebarBg)
         self.note_btn_indicator.config(bg=sidebarBg)
 
+        # Highlight the selected indicator
         indication_lb.config(bg="white")
         
     def create_sidebar_content(self):
@@ -123,9 +126,10 @@ class MainMenu:
             activebackground=sidebarBg,
             bd=0,
         )
-        btexpense.config(command=lambda: [self.switch_indication(self.expense_btn_indicator), Expense_Tracker(self.content_frame,self.secondSidebar)])
-        btexpense.place(x=15, y= 43)
+        btexpense.config(command=lambda: [self.switch_indication(self.expense_btn_indicator), Expense_Tracker(self.content_frame)])
+        btexpense.place(x=15, y=43)
 
+        # Reminder App button with an indicator
         self.reminder_btn_indicator = Label(
             self.sidebar,
             bg=sidebarBg
@@ -145,8 +149,9 @@ class MainMenu:
             activebackground=sidebarBg,
             command=lambda: [self.switch_indication(self.reminder_btn_indicator),ReminderApp(container = self.content_frame,sidebar=self.secondSidebar)]
         )
-        btReminder.place(x=15, y= 125)
+        btReminder.place(x=15, y=125)
         
+        # Notes Organizer button with an indicator
         self.note_btn_indicator = Label(
             self.sidebar,
             bg=sidebarBg
@@ -163,9 +168,9 @@ class MainMenu:
             bg=sidebarBg,
             bd=0,
             activebackground=sidebarBg,
-            command=lambda: [self.switch_indication(self.note_btn_indicator),NotesOrganizer(self.content_frame,self.secondSidebar)]
+            command=lambda: [self.switch_indication(self.note_btn_indicator),NotesOrganizer(self.content_frame)]
         )
-        btNote.place(x=15, y= 203)
+        btNote.place(x=15, y=203)
 
     def _animate_sidebar(self):
         """Smooth sidebar animation"""
@@ -189,8 +194,8 @@ class MainMenu:
         for widget in container.winfo_children():
             widget.destroy()
 
-    
 def main():
+    """Entry point of the application"""
     app = MainMenu()
     app.run()
 

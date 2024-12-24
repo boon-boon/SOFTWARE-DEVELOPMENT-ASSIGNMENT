@@ -12,8 +12,8 @@ import time
 
 class Expense_Tracker:
 #--------------------------------------------------------------
-    def __init__(self, container,sidebar):
-        #Basic initialize
+    def __init__(self, container):
+        # Basic initialization of the UI settings and paths
         self.BG_COLOR = "#181818"
         self.SIDEBAR_COLOR = "#212121"
         self.ACTIVE_COLOUR = "#383838"
@@ -22,7 +22,7 @@ class Expense_Tracker:
         self.FONT_BUTTON = ("Arial",10,"bold")
         self.FONT_BIG = ("Arial", 20, "bold")
         
-        #Photo path
+        # Paths for images and icons used in the app
         self.Photo_Path = "Expense_Tracker_Photo"
         self.P_Blue_Rectangle = "Expense_Tracker_Photo/Blue Rectangle.png"
         self.P_Expense_Icon_Path = ["Expense_Tracker_Photo/Food_Icon.png","Expense_Tracker_Photo/Bus_Icon.png","Expense_Tracker_Photo/Tissue_Icon.png","Expense_Tracker_Photo/Home_Icon.png", "Expense_Tracker_Photo/Utilities_Icon.png","Expense_Tracker_Photo/Education_Icon.png","Expense_Tracker_Photo/Entertaiment_Icon.png", "Expense_Tracker_Photo/Other_Icon.png"]
@@ -31,40 +31,36 @@ class Expense_Tracker:
         self.P_Income_Icon_Path = ["Expense_Tracker_Photo/Income_Icon.png","Expense_Tracker_Photo/Stock_Icon.png","Expense_Tracker_Photo/Allowance_Icon.png","Expense_Tracker_Photo/Other_Icon.png"]
         self.P_Black_Rectangle = ["Expense_Tracker_Photo/Black_Rectangle1.png"]
         
-        #Notepad Path
+        # File paths for storing data
         self.N_Income_History_File = "Expense_Tracker_Data/Income_History.txt"
         self.N_Expense_History_File = "Expense_Tracker_Data/Expense_History.txt"
         self.N_Assets_File = "Expense_Tracker_Data/Assets.txt"
         self.N_Expense_File = "Expense_Tracker_Data/Expense.txt"
         
-        #Array
-        self.account_Type = ['Cash','E-wallet','Debit card','Bank']
+        # Categories for accounts, expenses, and income
+        self.account_Type = ['Cash','E-wallet','Debit Card','Bank']
         self.expense_Category = ["Food", "Transport", "Daily Necessities", "Housing Expense", "Utilities", "Education", "Entertaiment", "Other"]
         self.expense_Category_Short = ["Food", "Transport", "Daily", "Housing", "Utilities", "Education", "Entertaiment", "Other"]
         self.income_Category = ["Income","Stock","Allowance","Other"]
         self.assetsLst = [" ", " ", " "," "," "," "]
         
-        #Initialize button for highlight
+       # Initialize button references for highlighting
         self.ACTIVE_BUTTON1 = None
         self.ACTIVE_BUTTON2 = None
         
-        #Initialize the max width for bar chart
-        self.bar_chart_min_width = 0
-        self.bar_chart_max_width = 250
-        self.bar_chart_bg = ["#FD663F", "#FDA93D", "#27C384", "#4289FF", "#92D66B", "#01A9F4", "#8C9EFF", "#FC65D5"]
-        
-        #-----------------------------------------------------------------------------
-        self.sidebar_Frame = sidebar
+        # Initialize sidebar and window
+        #self.sidebar_Frame = sidebar
         self.window = container
 
-        self.Clear_Sidebar()
-        self.Sidebar()
+        # Initialize the UI
+        #self.Clear_Sidebar()
+        #self.Sidebar()
         self.Create_Center_Content()
 
 
 #--------------------------------------------------------------
     def Create_Center_Content(self):
-        
+        # Clears the current frame and loads data into the UI
         self.Clear_Frame()
         self.Check_Data()
         self.Load_Expense_And_Income()
@@ -74,6 +70,7 @@ class Expense_Tracker:
         self.Full_Frame.pack_propagate(False)
         self.Full_Frame.grid_propagate(False)
 
+        # Clear the full frame and set up top navigation bar
         self.Clear_Full_Frame()
 
         self.top_Navigator =Frame(self.Full_Frame,height=50,width=1920,bg=self.SIDEBAR_COLOR)
@@ -81,6 +78,7 @@ class Expense_Tracker:
         self.top_Navigator.pack_propagate(False)
         self.top_Navigator.grid_propagate(False)
         
+        # Load blue rectangle image and add 'Add a new bill' button
         self.Load_Image(self.P_Blue_Rectangle,150,30)
         #Create a button to create a new bill
         self.add_New_Bill = Button(
@@ -99,12 +97,14 @@ class Expense_Tracker:
         self.add_New_Bill.image = self.img
         self.add_New_Bill.pack(side=RIGHT, fill=X, padx=30)
         
+        # Set up middle frame to hold the main content
         self.Middle_Frame = Frame(self.Full_Frame, bg=self.BG_COLOR, width=1920,height=1080)
         self.Middle_Frame.pack(side=LEFT, fill=Y)
         
         self.top5_high_exp_type = [" ", " ", " ", " ", " "]
         self.Load_Expense_And_Income()
         
+        # Reposition top navigator and middle frame
         self.top_Navigator.pack_forget()
         self.Middle_Frame.pack_forget()
         self.top_Navigator.pack(side=TOP, fill=X)
@@ -112,17 +112,8 @@ class Expense_Tracker:
         self.top_Navigator.grid_propagate(False)
         self.Middle_Frame.pack(side=LEFT, fill=Y)
         self.Clear_Middle_Frame()
-
-
-        #NEED TO BE MOVED
-        # highest_expense = max(self.expense_Amount)
-        # for i in range(0,9):
-        #     max_width = int(self.expense_Amount[i] / highest_expense * 300) 
-        #     bar_chart = Frame(self.Middle_Frame, bg=self.bar_chart_bg[i], width=0, height=40)
-        #     bar_chart.place(x=300,y=10+(i*60))
-        #     self.Animate_Bar_Chart(bar_chart,min=0,max=max_width)
         
-        #Print to show the total expense
+        # Print total expense label and amount
         self.Load_Image('Expense_Tracker_Photo/Black_Rectangle1.png',1455,130)
         black_rectangle = Label(self.Middle_Frame,image=self.img,bg=self.BG_COLOR, fg='#D7D7D7', text="Total Expense\n\n\n",compound=CENTER,font=self.FONT_MAIN)
         black_rectangle.image = self.img
@@ -134,10 +125,10 @@ class Expense_Tracker:
         ttl_exp_amt = Label(ttl_exp_frm,text=f"{self.total_Expense:.2f}",
                             bg=self.SIDEBAR_COLOR,
                             fg='white',
-                            font=("Cardium",24,"bold"))
+                            font=("Arial",24,"bold"))
         ttl_exp_amt.grid()
         
-        #Print the grey rounded rectangle behind the show expense history and pie chart
+        # Grey rectangle and expense history area
         self.Load_Image("Expense_Tracker_Photo/Black_Rectangle2.png",1455,600)
         center_Content_Rectangle = Label(self.Middle_Frame,image=self.img,bg=self.BG_COLOR)
         center_Content_Rectangle.image = self.img
@@ -147,7 +138,7 @@ class Expense_Tracker:
         print_exp_history_frame.place(x=40,y=240)
         print_exp_history_frame.pack_propagate(False)
         
-        #Print treeview to show the expense history
+        # Treeview to show the expense history
         self.style = ttk.Style()
         self.style.theme_use("default")
         
@@ -174,12 +165,14 @@ class Expense_Tracker:
             show = 'headings',
         )
         
+        # Treeview column headers
         self.tree.heading('Date', text='Date')
         self.tree.heading('Amount', text='Amount')
         self.tree.heading('Account', text='Account')
         self.tree.heading('Category', text='Category')
         self.tree.heading('Description', text='Description')
         
+        # Treeview column settings
         self.tree.column('Date', anchor=CENTER, width=25)
         self.tree.column('Amount', anchor=CENTER, width=30)
         self.tree.column('Account', anchor=CENTER, width=5)
@@ -187,18 +180,19 @@ class Expense_Tracker:
         self.tree.column('Description', anchor=CENTER, width=150)
         self.tree.pack(expand=True, fill=BOTH)
         
-        #Add scrollbar and define the mouse
+        # Scrollbar and mouse wheel interaction
         self.v_scroll = ttk.Scrollbar(print_exp_history_frame,orient=VERTICAL,command=self.tree.yview)
         self.tree.bind("<MouseWheel>", self.Mouse_Scroll)
         
+        # Load data into the treeview
         self.load_data_into_tree()
         
-        #Add right click menu to edit and delete
+         # Right-click menu for editing or deleting records
         self.rg_Click_Menu = Menu(self.Middle_Frame,tearoff=0)
         self.rg_Click_Menu.add_command(label="Edit", command=self.Edit_Data)
         self.rg_Click_Menu.add_command(label="Delete", command=self.Delete_Data)
         
-        #Bind the right click with a funcion to print edit and delete
+        # Bind right-click menu to treeview
         self.tree.bind("<Button-3>", self.Right_Click)  
         
         expense_category_not0 = []
@@ -211,57 +205,46 @@ class Expense_Tracker:
                 expense_category_not0.append(key)
                 expense_amount_not0.append(value)
             
-        #Print pie chart for expense
-                
-        
-        # z = 0
-        # for i in range(len(self.top5_high_exp)): 
-        #     for j in range(len(self.expense_Amount)): 
-        #         if self.top5_high_exp[i] == self.expense_Amount[j]:
-        #             self.top5_high_exp_type[z] = self.expense_Category[j]
-        #             z += 1
-        #             break
-        
-        # self.top5_high_exp[4] = sum(self.top5_low_exp)
-        # self.top5_high_exp_type[4] = 'Other'
-        
+        # Pie chart for expense categories
         fig = Figure(figsize=(5,5), dpi=110) # Size of the pie chart
         fig.patch.set_facecolor(self.SIDEBAR_COLOR)
         ax = fig.add_subplot(111)
-        # Array
         ax.pie(expense_amount_not0, labels=expense_category_not0,autopct='%1.1f%%', startangle=90)
         for text in ax.texts:
             text.set_color('white')
             text.set_fontsize(10)
         
+        # Draw pie chart onto the canvas
         canvas=FigureCanvasTkAgg(fig,master=self.Middle_Frame)
         canvas.draw()
         canvas.get_tk_widget().place(x=870,y=170)
         
-        #Print word at the last to avoid been cover
+        # Labels for expense history and top expenses
         print_Expense_History = Label(self.Middle_Frame,text="Expense History", font=self.FONT_BIG, bg=self.SIDEBAR_COLOR,fg='white')
         print_Expense_History.place(x=50,y=190)
         
-        print_Top5_Exp = Label(self.Middle_Frame,text="Top 5 Expense", font=self.FONT_BIG, bg=self.SIDEBAR_COLOR,fg='white')
-        print_Top5_Exp.place(x=1080,y=190)
+        print_Top5_Exp = Label(self.Middle_Frame,text="Top Expenses", font=self.FONT_BIG, bg=self.SIDEBAR_COLOR,fg='white')
+        print_Top5_Exp.place(x=1060,y=190)
 
 
 #--------------------------------------------------------------
     def Add_New_Bill(self):
-        
+        # Open the 'Add New Bill' interface
         self.top_Navigator.pack_forget()
         self.Clear_Middle_Frame()
         
-        #Print button to close or change page
+        # Button to close or navigate back
         print_Close_Button = Button(self.Middle_Frame,text="x",fg="white",bg=self.BG_COLOR,font=("Arial",20,"bold"),activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0,width=3,height=1,command=self.Create_Center_Content)
         print_Close_Button.place(x=10,y=2)
         
+        # Buttons for Expense and Income types
         print_Expense= Button(self.Middle_Frame,text="Expense",fg="#E73D41",bg=self.BG_COLOR,font=self.FONT_SUB,activebackground=self.ACTIVE_COLOUR,activeforeground="#E73D41",borderwidth=0)
         print_Expense.place(x=550,y=10)
     
         print_Income = Button(self.Middle_Frame, text="Income",fg="white",bg=self.BG_COLOR,font=self.FONT_SUB,activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0,command=self.Add_Income)
         print_Income.place(x=750,y=10)
         
+        # Display buttons for expense categories
         i = 0
         j = 0
         for i in range(0,8):
@@ -288,12 +271,14 @@ class Expense_Tracker:
             else:
                 expense_button.place(x=10+(i*350),y=40)
             expense_button.config(command=lambda button=expense_button, ic=self.expense_Category[i]: [self.Highlight_Button1(button),self.Store_Assets1(category=ic)])
-            
+        
+        # Black square background for account selection
         self.Load_Image(self.P_Black_Square,1500,400)
         print_Square_Bg = Label(self.Middle_Frame, image=self.img,bg=self.BG_COLOR)
         print_Square_Bg.image = self.img
         print_Square_Bg.place(x=10,y=310)
         
+        # Account selection labels
         print_Account_Type = Label(self.Middle_Frame,text="Select account:",bg=self.SIDEBAR_COLOR,font=self.FONT_MAIN,fg='white')
         print_Account_Type.place(x=50,y=340)
         
@@ -316,14 +301,14 @@ class Expense_Tracker:
             account_Label.place(x=40,y=390+(i*80))
             account_Label.config(command=lambda button=account_Label,x=self.account_Type[i]: [self.Highlight_Button2(button),self.Store_Assets1(account= x)])
         
-        #Create entry to enter description
+        # Create entry to enter description
         description_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='white',borderwidth=0,font=self.FONT_MAIN,width=100,insertbackground='#4C9FFA')
         description_Entry.insert(0, "Description")
         description_Entry.bind("<FocusIn>",self.Saving_Description_Entry_Clear)
         description_Entry.bind("<FocusOut>",self.Saving_Description_Entry_Restore)
         description_Entry.place(x=60,y=290)
         
-        #Create entry to input amount
+        # Create entry to input amount
         money_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='#F5494D',borderwidth=0,font=self.FONT_MAIN,width=100,insertbackground='#F5494D')
         money_Entry.insert(0, "0.00")
         money_Entry.bind("<FocusIn>",self.Expense_Money_Entry_Clear)
@@ -353,6 +338,7 @@ class Expense_Tracker:
         #Print the button to update the assets
         self.Load_Image(self.P_Blue_Rectangle,150,30)
         
+        # Create button to update assets (Expense)
         input_Expense = Button(
             self.Middle_Frame,
             text="Update assets",
@@ -367,23 +353,28 @@ class Expense_Tracker:
         command=lambda: self.Store_Assets2(description_Entry.get(), money_Entry.get(), calendar.get_date(),'Expense')
         )
         input_Expense.image = self.img
-        input_Expense.place(x=1285,y=9)
+        input_Expense.place(x=1285,y=9) # Position on screen
 
 
 #--------------------------------------------------------------        
+    # Function to add income
     def Add_Income(self):
-        self.Clear_Middle_Frame()        
+        
+        self.Clear_Middle_Frame()   # Clear current content on the middle frame   
             
-        #Print a button to close the frame
+        # Close button for the frame
         print_Close_Button = Button(self.Middle_Frame,text="x",fg="white",bg=self.BG_COLOR,font=("Arial",20,"bold"),activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0,width=3,height=1,command=self.Create_Center_Content)
         print_Close_Button.place(x=10,y=2)
         
+        # Button to switch to "Expense" section
         print_Expense= Button(self.Middle_Frame,text="Expense",fg="white",bg=self.BG_COLOR,font=self.FONT_SUB,activebackground=self.ACTIVE_COLOUR,activeforeground="white",borderwidth=0, command=self.Add_New_Bill)
         print_Expense.place(x=550,y=10)
-    
+
+        # Button to switch to "Income" section
         print_Income = Button(self.Middle_Frame, text="Income",fg="#2CC684",bg=self.BG_COLOR,font=self.FONT_SUB,activebackground=self.ACTIVE_COLOUR,activeforeground="#2CC684",borderwidth=0)
         print_Income.place(x=750,y=10)
         
+        # Loop to display income category buttons
         i = 0
         for i in range(0,4):
             self.Load_Image(self.P_Income_Icon_Path[i],30,30)
@@ -406,15 +397,17 @@ class Expense_Tracker:
             income_button.place(x=10+(i*350),y=60)
             income_button.config(command=lambda ic=self.income_Category[i], bt=income_button: [self.Store_Assets1(category=ic),self.Highlight_Button1(bt)])
         
-        #Print a square behind the account type
+        # Create background square for account selection
         self.Load_Image(self.P_Black_Square,1500,400)
         print_Square_Bg = Label(self.Middle_Frame, image=self.img,bg=self.BG_COLOR)
         print_Square_Bg.image = self.img
         print_Square_Bg.place(x=10,y=310)
         
+        # Label for account type selection
         print_Account_Type = Label(self.Middle_Frame,text="Select account:",bg=self.SIDEBAR_COLOR,font=self.FONT_MAIN,fg='white')
         print_Account_Type.place(x=50,y=340)
         
+        # Loop to display account type buttons
         for i in range(0,4):
             self.Load_Image(self.P_Account_Icon_Path[i],60,60)
             account_Label = Button(self.Middle_Frame,
@@ -431,24 +424,24 @@ class Expense_Tracker:
                                   anchor='w'
                                   )
             account_Label.image = self.img
-            account_Label.place(x=40,y=390+(i*80))
-            account_Label.config(command=lambda button=account_Label,x=self.account_Type[i]: [self.Highlight_Button2(button),self.Store_Assets1(account= x)])
+            account_Label.place(x=40,y=390+(i*80))  # Position dynamically
+            account_Label.config(command=lambda button=account_Label,x=self.account_Type[i]: [self.Highlight_Button2(button),self.Store_Assets1(account= x)])   # Store account data when clicked
 
-        #Create entry to enter description
+        # Create entry to enter description
         description_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='white',borderwidth=0,font=self.FONT_MAIN,width=100,insertbackground='#4C9FFA')
         description_Entry.insert(0, "Description")
         description_Entry.bind("<FocusIn>",self.Saving_Description_Entry_Clear)
         description_Entry.bind("<FocusOut>",self.Saving_Description_Entry_Restore)
         description_Entry.place(x=60,y=290)
         
-        #Create entry to input amount
+        # Create entry to input amount
         money_Entry = Entry(self.Middle_Frame,bg=self.BG_COLOR,fg='#3DD393',borderwidth=0,font=self.FONT_MAIN,width=100,insertbackground='#3DD393')
         money_Entry.insert(0, "0.00")
         money_Entry.bind("<FocusIn>",self.Saving_Money_Entry_Clear)
         money_Entry.bind("<FocusOut>",self.Saving_Money_Entry_Restore)
         money_Entry.place(x=1375,y=290)
 
-        #Create date to input date
+        # Create calendar to input date
         calendar = Calendar(self.Middle_Frame,
                             background=self.SIDEBAR_COLOR,  
                             foreground="white",  
@@ -471,6 +464,7 @@ class Expense_Tracker:
         #Print the button to update the assets
         self.Load_Image(self.P_Blue_Rectangle,150,30)
         
+        # Button to update assets (Income)
         input_Income = Button(
             self.Middle_Frame,
             text="Update assets",
@@ -485,19 +479,19 @@ class Expense_Tracker:
             command=lambda: self.Store_Assets2(description_Entry.get(), money_Entry.get(), calendar.get_date(),'Income')
         )
         input_Income.image = self.img
-        input_Income.place(x=1285,y=9)
+        input_Income.place(x=1285,y=9)  # Position on screen
         
 
 #Call function at below
 #--------------------------------------------------------------
-    #Use to initialize the image just call it            
+    # Use to initialize the image by resizing and converting it for Tkinter display
     def Load_Image(self, image_Path, image_Width, image_Height):
         self.img = Image.open(image_Path)
         self.img = self.img.resize((image_Width,image_Height))
         self.img = ImageTk.PhotoImage(self.img)
         
 #--------------------------------------------------------------      
-    #Use to initialize word ("description") the entry for description
+    # Clear the entry if the default 'Description' text is present
     def Saving_Description_Entry_Clear(self,event):
         widget = event.widget
         if widget.get() == "Description":
@@ -505,7 +499,7 @@ class Expense_Tracker:
             widget.config(fg="white")
     
 #--------------------------------------------------------------
-    #Use to delete the initialize word when pressed    
+    # Check and create necessary files if they do not exist
     def Saving_Description_Entry_Restore(self,event):
         widget = event.widget
         if not widget.get():
@@ -514,7 +508,7 @@ class Expense_Tracker:
     
     
 #--------------------------------------------------------------
-    #Use to initialize word(0.00)at the entry of money    
+    # Clear the entry if the default "0.00" text is present    
     def Saving_Money_Entry_Clear(self,event):
         widget = event.widget
         if widget.get() == "0.00":
@@ -522,7 +516,8 @@ class Expense_Tracker:
             widget.config(fg="#3DD393")
     
     
-#--------------------------------------------------------------    
+#--------------------------------------------------------------  
+    # Restore the default "0.00" text if the entry is empty  
     def Saving_Money_Entry_Restore(self,event):
         widget = event.widget
         if not widget.get():
@@ -531,7 +526,7 @@ class Expense_Tracker:
 
 
 #--------------------------------------------------------------
-    # Use to check whether the notepad is created or not
+    # Check and create necessary files if they do not exist
     def Check_Data(self):
         
         if not os.path.exists(self.N_Income_History_File):
@@ -552,25 +547,28 @@ class Expense_Tracker:
                 
 
 #--------------------------------------------------------------
-    #Use to clear the middle frame
+    # Clear all widgets in the middle frame
     def Clear_Frame(self):
         for widget in self.window.winfo_children():
             widget.destroy()
 
 
 #--------------------------------------------------------------
+    # Clear all widgets in the sidebar area
     def Clear_Navigator(self):
         for widget in self.top_Navigator.winfo_children():
             widget.destroy()
             
 
 #--------------------------------------------------------------
+    # Clear all widgets in the sidebar area
     def Clear_Sidebar(self):
         for widget in self.dsd.winfo_children():
             widget.destroy()
             
             
 #--------------------------------------------------------------
+    # Clear all widgets in the middle frame and reset button states
     def Clear_Middle_Frame(self):
         for widget in self.Middle_Frame.winfo_children():
             widget.destroy()
@@ -582,19 +580,21 @@ class Expense_Tracker:
 
 
 #--------------------------------------------------------------
+    # Clear all widgets in the full frame
     def Clear_Full_Frame(self):
         for widget in self.Full_Frame.winfo_children():
             widget.destroy()
 
 
-#--------------------------------------------------------------        
+#-------------------------------------------------------------- 
+    # Clear all widgets in the sidebar frame       
     def Clear_Sidebar(self):
         for widget in self.sidebar_Frame.winfo_children():
             widget.destroy()
 
 
 #--------------------------------------------------------------      
-    #Use to initialize word ("description") the entry for description
+    # Clear the entry if the default 'Description' text is present
     def Saving_Description_Entry_Clear(self,event):
         widget = event.widget
         if widget.get() == "Description":
@@ -603,7 +603,7 @@ class Expense_Tracker:
     
     
 #--------------------------------------------------------------
-    #Use to delete the initialize word when pressed    
+    # Restore the default 'Description' text if the entry is empty
     def Saving_Description_Entry_Restore(self,event):
         widget = event.widget
         if not widget.get():
@@ -611,7 +611,8 @@ class Expense_Tracker:
             widget.config(fg='white')
     
     
-#--------------------------------------------------------------    
+#--------------------------------------------------------------   
+    # Clear the entry if the default "0.00" text is present 
     def Saving_Money_Entry_Clear(self,event):
         widget = event.widget
         if widget.get() == "0.00":
@@ -619,7 +620,8 @@ class Expense_Tracker:
             widget.config(fg="#3DD393")
     
     
-#--------------------------------------------------------------    
+#--------------------------------------------------------------  
+    # Restore the default "0.00" text if the entry is empty  
     def Saving_Money_Entry_Restore(self,event):
         widget = event.widget
         if not widget.get():
@@ -627,7 +629,8 @@ class Expense_Tracker:
             widget.config(fg='#3DD393')
 
 
-#--------------------------------------------------------------     
+#-------------------------------------------------------------- 
+    # Clear the entry if the default "0.00" text is present for expenses    
     def Expense_Money_Entry_Clear(self,event):
         widget=event.widget
         if widget.get() == "0.00":
@@ -636,6 +639,7 @@ class Expense_Tracker:
             
             
 #-------------------------------------------------------------- 
+    # Restore the default "0.00" text if the entry is empty for expenses
     def Expense_Money_Entry_Restore(self,event):
         widget=event.widget
         if not widget.get():
@@ -643,7 +647,8 @@ class Expense_Tracker:
             widget.config(fg="#F5494D")
             
             
-#--------------------------------------------------------------    
+#--------------------------------------------------------------  
+    # Highlight Button1 and reset the previously active button  
     def Highlight_Button1(self, new_Button1):
         if self.ACTIVE_BUTTON1 is not None:
             self.ACTIVE_BUTTON1.config(bg=self.BG_COLOR)
@@ -651,7 +656,8 @@ class Expense_Tracker:
         self.ACTIVE_BUTTON1 = new_Button1
 
     
-#--------------------------------------------------------------    
+#--------------------------------------------------------------
+    # Highlight Button2 and reset the previously active button    
     def Highlight_Button2(self,new_Button2):
         if self.ACTIVE_BUTTON2 is not None:
             self.ACTIVE_BUTTON2.config(bg=self.SIDEBAR_COLOR)
@@ -661,12 +667,15 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def Load_Expense_And_Income(self):
+        # Initialize expense amounts and related data structures
         self.expense_Amount = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         self.expense_Amount_Dict = {}
+        self.income_Amount_Dict = {}
         self.top5_high_exp = [0.00,0.00,0.00,0.00,0.00]
         self.top5_low_exp = [0.00,0.00,0.00,0.00]
         self.total_Expense = 0
 
+        # Load expense data from file
         with open(self.N_Expense_File,'r') as file:
             lines = file.readlines()
 
@@ -677,6 +686,7 @@ class Expense_Tracker:
                 value_str = parts[1].strip()
                 
                 value = float(value_str)
+                # Map expense categories to specific indices
                 if key == 'Food':
                     self.expense_Amount_Dict[key] = value
                     self.expense_Amount[0] = value
@@ -702,15 +712,15 @@ class Expense_Tracker:
                     self.expense_Amount_Dict[key] = value
                     self.expense_Amount[7] = value
                                   
-        
+        # Calculate total expenses
         for i in range(0,8):
             self.total_Expense += self.expense_Amount[i]
     
-        #Find the top5 highest expense
+        # Find the top 5 highest and lowest expenses
         self.top5_high_exp = sorted(self.expense_Amount,reverse=True)[:5]
         self.top5_low_exp = sorted(self.expense_Amount)[:4]
         
-        #Load Assets
+        # Load income data from assets file
         self.income_Amount = [0.00,0.00,0.00,0.00]
         self.Total_Assets = 0
     
@@ -720,30 +730,36 @@ class Expense_Tracker:
         for line in lines:
             parts = line.split(':')
             if len(parts) == 2:
-                key = parts[0].strip().lower()
+                key = parts[0].strip()
                 value_str = parts[1].strip()
-                
 
                 value = float(value_str)
-                if key == 'cash':
+                # Map income categories to specific indices
+                if key == 'Cash':
+                    self.income_Amount_Dict[key] = value
                     self.income_Amount[0] = value
-                elif key == 'e-wallet':
+                elif key == 'E-wallet':
+                    self.income_Amount_Dict[key] = value
                     self.income_Amount[1] = value
-                elif key == 'debit card':
+                elif key == 'Debit Card':
+                    self.income_Amount_Dict[key] = value
                     self.income_Amount[2] = value
-                elif key == 'bank':
+                elif key == 'Bank':
+                    self.income_Amount_Dict[key] = value
                     self.income_Amount[3] = value
 
-        #Calculate the total
+        # Calculate total assets
         for i in range(0,4):
             self.Total_Assets += self.income_Amount[i]
 
 #--------------------------------------------------------------
     def load_data_into_tree(self):
+        # Clear existing rows in the tree view
         for row in self.tree.get_children():
             self.tree.delete(row)
 
         data = []
+        # Read expense history from file and parse data
         with open(self.N_Expense_History_File, 'r') as file:
             record = {}
             for line in file:
@@ -764,18 +780,20 @@ class Expense_Tracker:
                         })
                         record = {}  
                 else:
-                    if ": " in line:
+                    if ": " in line:    # Parse key-value pairs
                         key, value = line.split(": ", 1)
                         record[key] = value
 
+        # Sort data by date in descending order
         data.sort(key=lambda x: datetime.strptime(x["Date"], "%d/%m/%Y"),reverse=True)
 
+        # Insert parsed data into the tree view
         for record in data:
             self.tree.insert('', END, values=(record["Date"], record["Amount"], record["Account"], record["Category"], record["Description"]))
 
 
 #--------------------------------------------------------------
-    #Store the category and account
+    # Store category and account information
     def Store_Assets1(self, category=None, account=None):
         if category is not None:
             self.assetsLst[1] = f"Category: {category} "
@@ -784,9 +802,9 @@ class Expense_Tracker:
 
 
 #--------------------------------------------------------------
-    #Store the description, amount and date
+    # Store description, amount, and date information
     def Store_Assets2(self,description=None, amount=None, date=None,category=None):
-        #Debug
+        # Validate input data
         if amount.isalpha() == 1 or self.ACTIVE_BUTTON1 == None or self.ACTIVE_BUTTON2 == None and amount>0:
             messagebox.showerror("Error", "Please fill it correctly")
             return
@@ -797,33 +815,34 @@ class Expense_Tracker:
             messagebox.showerror("Error", "Please fill integer number")
             return
 
-        #If no descripiton than print nothings into notepad
+        # Set description to 'Description' if not provided
         if description != 'Description':
             self.assetsLst[2] = f"Description: {description}"
         else:
             self.assetsLst[2] = f"Description: "
         
+        # Validate and adjust amounts based on category
         if category == 'Expense':    
             different_acc = self.assetsLst[4].split(":")[1].strip()
             if different_acc == 'Cash':
                 differentiate_acc = 0
             elif different_acc == 'E-wallet':
                 differentiate_acc = 1
-            elif different_acc == 'Debit card':
+            elif different_acc == 'Debit Card':
                 differentiate_acc = 2
             elif different_acc == 'Bank':
                 differentiate_acc = 3
             
-            if self.income_Amount[differentiate_acc] > float(amount):
-                self.assetsLst[3] = f"Amount: {amount} "
-            else:
-                messagebox.showerror("Invalid Input", "You don't have enough assets")
-                return
+            # if self.income_Amount[differentiate_acc] > float(amount):
+            #     self.assetsLst[3] = f"Amount: {amount} "
+            # else:
+            #     messagebox.showerror("Invalid Input", "You don't have enough assets")
+            #     return
         
         self.assetsLst[3] = f"Amount: {amount} "
         self.assetsLst[0] = f"Date: {date} "
         
-        #Seperate the string from Accoutn:Cash to Cash
+        # Determine category and update corresponding amounts
         different_acc = self.assetsLst[4].split(":")[1].strip()
         amount = float(self.assetsLst[3].split(":")[1])
         
@@ -837,17 +856,19 @@ class Expense_Tracker:
             self.income_Amount[0] += formula * amount
         elif different_acc == 'E-wallet':
             self.income_Amount[1] += formula * amount
-        elif different_acc == 'Debit card':
+        elif different_acc == 'Debit Card':
             self.income_Amount[2] += formula * amount
         elif different_acc == 'Bank':
             self.income_Amount[3] += formula * amount
         
+        # Append to history file
         if category =='Income':
             with open(self.N_Income_History_File, 'a') as file:
                 for item in self.assetsLst:
                     file.write(item+'\n')
             file.close()
         else:
+        # Update assets file
             with open(self.N_Expense_History_File, 'a') as file:
                 for item in self.assetsLst:
                     file.write(item+'\n')
@@ -875,8 +896,10 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def Save_Income_Account(self):
+        # Prepare data string representing income amounts by category
         data = f"Cash: {self.income_Amount[0]:.2f}\nE-wallet: {self.income_Amount[1]:.2f}\nDebit Card: {self.income_Amount[2]:.2f}\nBank: {self.income_Amount[3]:.2f}"
-        
+
+        # Write income data to file
         with open(self.N_Assets_File, 'w') as file:
             file.write(data)
         file.close()
@@ -884,8 +907,10 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def Save_Expense_Account(self):
+        # Prepare data string representing expense amounts by category
         data = f"Food: {self.expense_Amount[0]:.2f}\nTransport: {self.expense_Amount[1]:.2f}\nDaily: {self.expense_Amount[2]:.2f}\nHousing: {self.expense_Amount[3]:.2f}\nUtilities: {self.expense_Amount[4]:.2f}\nEducation: {self.expense_Amount[5]:.2f}\nEntertaiment: {self.expense_Amount[6]:.2f}\nOther: {self.expense_Amount[7]:.2f}"
         
+        # Write expense data to file
         with open(self.N_Expense_File, 'w')as file:
             file.write(data)
         file.close()
@@ -893,6 +918,7 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def Animate_Bar_Chart(self, frame,min,max): 
+         # Gradually increase the width of the frame to create an animation effect
         for height in range(min, max + 1, 5):
             frame.config(width=height)
             self.window.update()
@@ -901,32 +927,37 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def Mouse_Scroll(self,event):
+        # Scroll the tree view vertically based on mouse wheel input
         self.tree.yview_scroll((event.delta // 120), "units")
 
 
 #--------------------------------------------------------------
     def Right_Click(self,event):
+        # Identify the row in the tree view under the cursor
         row_Id = self.tree.identify_row(event.y)
         if row_Id:
-            self.tree.selection_set(row_Id)
-            self.rg_Click_Menu.post(event.x_root, event.y_root)
+            self.tree.selection_set(row_Id) # Select the identified row
+            self.rg_Click_Menu.post(event.x_root, event.y_root) # Display context menu
 
 #--------------------------------------------------------------
     def Edit_Data(self):
+        # Get the selected row in the tree view
         self.selected_Data = self.tree.selection()
         
+        # Retrieve the values of the selected row
         values = self.tree.item(self.selected_Data, "values")
         
-        
+        # Open the edit window with the selected row's values
         self.Open_Edit_Window(values)
 
 
 #--------------------------------------------------------------
     def Open_Edit_Window(self, values):
+        # Create a new top-level window for editing data
         Edit_Window = Toplevel(self.window)
         Edit_Window.title("Edit data")
         
-        # Use to print the date and edit the date
+        # Create and configure widgets for editing each field
         prt_Date = Label(Edit_Window, text="Date (DD/MM/YYYY): ")
         prt_Date.grid(row=0,column=0,padx=10,pady=5)
         date_Entry = DateEntry(Edit_Window, width=20, state="readonly", date_pattern="dd/mm/yyyy")
@@ -975,11 +1006,11 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def Store_Editted_Data(self, date, amount, account, category, description, edit_window, original_values):
-    # Validate amount input
-        
+        # Validate that the amount is a numeric value
         if amount.isalpha == 1:
             messagebox.showerror("Invalid Input", "Please input number only")
      
+        # Update the tree view item with the new values
         self.tree.item(self.selected_Data, values=(date, amount, account, category, description))
         
         amount = float(amount)
@@ -1060,10 +1091,13 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def Delete_Data(self):
+        # Get the selected row in the tree view
         selected_Data = self.tree.selection()
         
+        # Retrieve values of the selected row
         values = self.tree.item(selected_Data, "values")
         
+        # Delete the selected row from the tree view
         self.tree.delete(selected_Data)
         
         amount = float(values[1])
@@ -1080,11 +1114,13 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def Update_Expense_History(self):
+        # Collect all rows from the tree view
         rows = self.tree.get_children()
         data=[]
         for row in rows:
             data.append(self.tree.item(row, "values"))
         
+        # Write expense history to a file
         with open(self.N_Expense_History_File, 'w') as file:
             for record in data:
                 file.write(f"Date: {record[0]}\nCategory: {record[3]}\nDescription: {record[4]}\nAmount: {record[1]}\nAccount: {record[2]}\n\n")
@@ -1094,20 +1130,23 @@ class Expense_Tracker:
         
 #--------------------------------------------------------------
     def Sidebar(self):
+        # Create a sidebar frame
         self.dsd = Frame(self.sidebar_Frame, bg='#2f3336',height=1080,width=250)
         self.dsd.pack()
         self.dsd.pack_propagate()
         
+        # Define sidebar sections and their callbacks
         main_Section = [
             ("Home", "🏠"),
-            ("Assets", "👛")
+            ("Income", "👛")
         ]
         
         section_callbacks = {
             "Home": self.Create_Center_Content,
-            "Assets": self.Open_Assets_Page,
+            "Income": self.Open_Assets_Page,
         }
         
+        # Create buttons for each section
         for item_text, emoji in main_Section:
             button = Button(
                 self.dsd,
@@ -1130,102 +1169,105 @@ class Expense_Tracker:
 
 #--------------------------------------------------------------
     def Open_Assets_Page(self):
-        # self.Clear_Full_Frame()
+        # Clear and configure frames for the assets page
         self.top_Navigator.forget()
         self.Clear_Middle_Frame()
         
-        # frm1 = Frame(self.Middle_Frame,bg='white', height=10,width=1920)
-        # frm1.pack(side=TOP, fill=Y)
-        
-        # frm2 = Frame(self.Middle_Frame,bg='red', height=150,width=1920)
-        # frm2.pack(side=TOP, fill=Y)
-        # frm2.pack_propagate(False)
-        
-        # frm1_frm2 = Frame(frm2, bg='blue', height=130, width=1600)
-        # frm1_frm2.pack()
-        # frm1_frm2.pack_propagate(False)
-        
-        # self.Load_Image("Expense_Tracker_Photo/Black_Rectangle1.png", 1425,120)
-        # lbl1_frm1_frm2 = Label(frm1_frm2, image=self.img, width=1500, height=100, bg='green',text='Net Assets\n\n\n', compound=CENTER, fg='white',font=self.FONT_MAIN)
-        # lbl1_frm1_frm2.image = self.img
-        # lbl1_frm1_frm2.pack()
-        # lbl1_frm1_frm2.pack_propagate(False)
-        
-        # lbl2_frm1_frm2 = Label(frm1_frm2, text=f'{self.Total_Assets:.2f}',fg='white',compound=CENTER,bg='black')
-        # lbl2_frm1_frm2.pack()
-        
+        # Create a navigation bar at the top of the assets page
         assets_Page_Navigator = Frame(self.Middle_Frame,height=65,width=1920,bg=self.SIDEBAR_COLOR)
         assets_Page_Navigator.grid(row=0,column=0)
-        print_Assets = Label(assets_Page_Navigator,text="Assets",fg="white",bg=self.SIDEBAR_COLOR,font=self.FONT_BIG)
+        print_Assets = Label(assets_Page_Navigator,text="Income",fg="white",bg=self.SIDEBAR_COLOR,font=self.FONT_BIG)
         print_Assets.place(x=675,y=15)
 
+        # Add a label to display "Assets" in the navigation bar
         self.Load_Image("Expense_Tracker_Photo/Black_Rectangle1.png",1425,130)
         assests_Page_Top_Frame_Rectangle = Label(self.Middle_Frame,image=self.img,bg=self.BG_COLOR)
         assests_Page_Top_Frame_Rectangle.image = self.img
         assests_Page_Top_Frame_Rectangle.place(x=15,y=75)
         
-        #Print the Net assets in the top middle
+        # Display the "Net Assets" label in the top middle
         print_Total_Assets = Label(
             self.Middle_Frame,
-            text=("Net Assets"),
+            text=("Total Income"),
             bg=self.SIDEBAR_COLOR,
             font=self.FONT_MAIN,
             fg='#D7D7D7'
         )
         print_Total_Assets.place(x=660, y=100)
         
+        # Create a frame to hold the total assets amount
         ttl_inc_frm = Frame(self.Middle_Frame, bg=self.SIDEBAR_COLOR, width=100,height=50)
         ttl_inc_frm.place(x=655,y=130)
         
+        # Display the total assets amount
         ttl_inc_amt = Label(ttl_inc_frm, 
                             text=f"{self.Total_Assets:.2f}",
                             bg=self.SIDEBAR_COLOR,
                             fg='white',
-                            font=("Cardium",24,"bold")
+                            font=("Arial",24,"bold")
                             )
         ttl_inc_amt.grid()
         
-        #Print the rectangle rounded corner at the middle
+        # Load and display a larger decorative image in the middle of the page
         self.Load_Image("Expense_Tracker_Photo/Black_Rectangle2.png",1425,600)
         self.img_Frame = Label(self.Middle_Frame,image=self.img,bg=self.BG_COLOR)
         self.img_Frame.image = self.img
         self.img_Frame.place(x=15,y=220)
         
-        #Print the asset type at the top left in
+        # Add a label for "Asset Type" in the top-left corner
         assets_Types = Label(self.Middle_Frame, text="Asset Type",bg=self.SIDEBAR_COLOR,font=self.FONT_BIG,fg="white")
         assets_Types.place(x=45,y=240)
         
-        #Create a new frame 
+        # Create a frame for displaying account balances
         frame_Print_Acc_Balance = Frame(self.Middle_Frame,bg=self.SIDEBAR_COLOR,width=200,height=1080)
         frame_Print_Acc_Balance.place(x=550,y=275)
         
+        # Loop to display account icons, types, and balances
         for i in range(0,4):
+            # Load and display account icons
             self.Load_Image(self.P_Account_Icon_Path[i],50,50)
             account_Icon_Frame = Label(self.Middle_Frame,image=self.img,bg=self.SIDEBAR_COLOR)
             account_Icon_Frame.image = self.img
             account_Icon_Frame.place(x=50,y=300+(i*110))
             
+            # Display account type names
             print_Account_Type = Label(self.Middle_Frame,text=self.account_Type[i],bg=self.SIDEBAR_COLOR,fg='white',font=self.FONT_BIG)
             print_Account_Type.place(x=175,y=310+(i*110))
             
+            # Display "RM" currency label for account balances
             print_RM_Account_Balance = Label(self.Middle_Frame,text='RM',bg=self.SIDEBAR_COLOR,fg='white',font=self.FONT_BIG)
             print_RM_Account_Balance.place(x=525,y=310+(i*110))
             
+            # Display the account balances
             print_Account_Balance = Label(frame_Print_Acc_Balance,text=f"{self.income_Amount[i]:.2f}",bg=self.SIDEBAR_COLOR,fg='white',font=self.FONT_BIG)
             print_Account_Balance.grid(row=i,column=0,pady=36,padx=50,sticky='e')
 
-        #Print pie chart
+        income_category_not0 = []
+        income_amount_not0 = []
+
+        for i in range(len(self.income_Category)):
+            key = self.account_Type[i]
+            value = self.income_Amount_Dict.get(key)
+            if value != None and value > 0:
+                income_category_not0.append(key)
+                income_amount_not0.append(value)
+
+        # Create a pie chart to visualize account balances
         fig = Figure(figsize=(5, 5), dpi=110)
         fig.patch.set_facecolor(self.SIDEBAR_COLOR)  #Set the colour same with the background colour 
         ax = fig.add_subplot(111)
-        ax.pie(self.income_Amount, labels=self.account_Type, autopct='%1.1f%%', startangle=90)
+        ax.pie(income_amount_not0, labels=income_category_not0, autopct='%1.1f%%', startangle=90)
+        
+        # Customize text color and font size in the pie chart
         for text in ax.texts:
             text.set_color('white')
             text.set_fontsize(10)
         
+        # Add the pie chart to the frame
         canvas = FigureCanvasTkAgg(fig, master=self.Middle_Frame)
         canvas.draw()
         canvas.get_tk_widget().place(x=870,y=240)
         
-        print_Acc_Balance_Pie_Chart = Label(self.Middle_Frame, text="Account Balances",bg=self.SIDEBAR_COLOR,font=self.FONT_MAIN,fg="white")
-        print_Acc_Balance_Pie_Chart.place(x=1070,y=240)
+        # Add a label for the pie chart
+        print_Acc_Balance_Pie_Chart = Label(self.Middle_Frame, text="Balances",bg=self.SIDEBAR_COLOR,font=self.FONT_BIG,fg="white")
+        print_Acc_Balance_Pie_Chart.place(x=1090,y=240)

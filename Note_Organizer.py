@@ -4,7 +4,8 @@ from PIL import Image, ImageTk
 import os
 
 class NotesOrganizer:
-    def __init__(self, container, sidebar):
+    def __init__(self, container):
+        # Initialize constants and default values
         self.BG_COLOR = "#181818"
         self.SIDEBAR_COLOR = "#212121"
         self.ACTIVE_COLOUR = "#383838"
@@ -17,28 +18,32 @@ class NotesOrganizer:
         self.image_file_location = 'None'
         
         self.container = container
-        self.sidebar = sidebar
+
+        # Perform initial setup
         self.Check_Note()
-        self.Clear_Sidebar_Frame()
         self.Main_Menu()
-        self.Sidebar()
  
     def Main_Menu(self):
+        """Create the main menu layout."""
         self.Edit_File = False
         self.Clear_Frame()
         self.Load_Notepad()
 
+        # Top navigation bar
         self.top_Navigator = tk.Frame(self.container, height=60, bg='#181818')
         self.top_Navigator.pack(side=tk.TOP, fill=tk.X)
         self.top_Navigator.pack_propagate(False)
         
+        # Frame for the notes table
         self.tree_Frame = tk.Frame(self.container, height=600,width=1350, bg='white')
         self.tree_Frame.pack(pady=30)
         self.tree_Frame.pack_propagate(False)
         
+        # Configure styles for the treeview
         self.style = ttk.Style()
         self.style.theme_use("default")
 
+        # Add button to create a new note
         add_Note = tk.Button(self.top_Navigator, 
                              text='➕', 
                              bg='#181818', 
@@ -49,9 +54,11 @@ class NotesOrganizer:
                              command=lambda: self.Add_button_function())
         add_Note.pack(side=tk.RIGHT, pady=20,padx=50)
         
+        # Main label for the application
         label = tk.Label(self.top_Navigator, text="Note Organizer", bg="#181818", fg="white", font=("Arial Rounded MT Bold", 14))
         label.pack(pady=20)
         
+        # Configure treeview styles
         self.style.configure(
             "Custom.Treeview",
             background=self.SIDEBAR_COLOR,      
@@ -60,7 +67,7 @@ class NotesOrganizer:
             font=('Arial', 13)
         )
         
-        #For headings
+        # Configure treeview heading styles
         self.style.configure(
             "Custom.Treeview.Heading",
             background=self.SIDEBAR_COLOR,   
@@ -68,6 +75,7 @@ class NotesOrganizer:
             font=('Arial', 14, 'bold'), 
         )
         
+        # Create treeview widget
         self.tree = ttk.Treeview(
             self.tree_Frame,
             style="Custom.Treeview",
@@ -75,30 +83,38 @@ class NotesOrganizer:
             show = "headings"
         )
         
+        # Define headings for the treeview
         self.tree.heading("Category", text="Category")
         self.tree.heading("Tag", text="Tag")
         self.tree.heading("Text", text="Text")
         
+        # Configure column properties
         self.tree.column("Category", anchor=tk.CENTER, width=50)
         self.tree.column("Tag", anchor=tk.CENTER, width=200)
         self.tree.column("Text", anchor=tk.CENTER, width=500)
         self.tree.pack(expand=True, fill=tk.BOTH)
         
+        # Load notes into the treeview
         self.Load_Into_Tree()
         
+        # Create a right-click context menu for the treeview
         self.rg_Click_Menu = tk.Menu(self.container, tearoff=0)
         self.rg_Click_Menu.add_command(label="Edit", command=self.Open_Note)
         self.rg_Click_Menu.add_command(label="Delete", command=self.Delete_Note)
         
+        # Bind right-click menu to the treeview
         self.tree.bind("<Button-3>", self.Right_Click_Menu)
 
     def Add_button_function(self):
+        """Open the interface to add a new note."""
         self.Clear_Frame()
         open_new_window = self.container
 
+        # Top sidebar frame for adding note options
         Top_sidebar_frame = tk.Frame(open_new_window, height=60, bg='#181818')
         Top_sidebar_frame.pack(side="top", fill="x")
 
+        # Label for selecting a category
         category_label = tk.Label(
             Top_sidebar_frame, 
             text="Select Category:", 
@@ -107,6 +123,7 @@ class NotesOrganizer:
             fg='white')
         category_label.pack(side="left", padx=20, pady=10)
 
+        # Dropdown menu for category selection
         category_type = tk.StringVar()
         self.category_dropdown = ttk.Combobox(
             Top_sidebar_frame, 
@@ -118,7 +135,7 @@ class NotesOrganizer:
             )
         self.category_dropdown.pack(side="left", padx=10, pady=10)
 
-        #called function when the button is clicked
+        # Button to insert an image
         def no_image_button_click():
             self.insert_picture()
 
@@ -134,6 +151,7 @@ class NotesOrganizer:
             )
         Picture_button.pack(side="right", pady=10, padx=10)
 
+        # Save button to save the note
         save_buttonn = tk.Button(
             Top_sidebar_frame,
             text="💾",
@@ -146,7 +164,7 @@ class NotesOrganizer:
         )   
         save_buttonn.pack(side="right", pady=15, padx=30)
         
-        # Print the tags before the text
+        # Label for entering tags
         tag_text_box_label = tk.Label(
             open_new_window,
             text="Tags: ",
@@ -156,6 +174,7 @@ class NotesOrganizer:
         )
         tag_text_box_label.pack(pady=10)
 
+        # Text box for entering tags
         self.tag_text_box = tk.Text(
             open_new_window,
             height=3,
@@ -170,6 +189,7 @@ class NotesOrganizer:
         )
         self.tag_text_box.pack(padx=10, pady=(5, 10))
 
+        # Label for entering the note text
         note_text_box_label = tk.Label(
             open_new_window,
             text="Note: ",
@@ -179,6 +199,7 @@ class NotesOrganizer:
         )
         note_text_box_label.pack(pady=10)
 
+        # Text box for entering the note content
         self.note_text_box = tk.Text(
             open_new_window,
             height=30,
@@ -194,7 +215,7 @@ class NotesOrganizer:
         self.note_text_box.pack(padx=10, pady=(5, 10))
 
     def insert_picture(self):
-        # A function that use to insert image from disk
+        """Insert an image into the note."""
         file_Path = filedialog.askopenfilename(
             title='Select Image', 
             filetype=[
@@ -208,38 +229,40 @@ class NotesOrganizer:
             return
         
         try:
-            #Open the image
+            # Open the image
             img = Image.open(self.image_file_location)
 
-            #Resize image if it's too large 
+            # Resize image if it's too large 
             max_width = 600
             if img.width > max_width:
                 ratio = max_width / img.width
                 new_height = int(img.height * ratio)
                 img = img.resize((max_width, new_height), Image.LANCZOS)
-            #Convert to photo image
+            # Convert to photo image
             photo = ImageTk.PhotoImage(img)
-            #Insert picture into note_text_box
+            # Insert picture into note_text_box
             self.note_text_box.image_create(tk.END, image=photo)
             # Keep a reference to prevent garbage collection
             if not hasattr(self.note_text_box, 'images'):
                 self.note_text_box.images = []
             self.note_text_box.images.append(photo)
 
-            #Insert a newline after Image
+            # Insert a newline after Image
             self.note_text_box.insert(tk.END, '\n')
 
         except Exception as e:
             messagebox.showerror("Error", f"Could not open image: {str(e)}")
     
     def save_note(self):
+        """Save the current note to the file."""
         # Get category
         category = self.category_dropdown.get()
         # Get tags
         tags_content = self.tag_text_box.get(1.0, tk.END).strip()
         #Get the note content
-        note_content = self.note_text_box.get(1.0, tk.END).strip()
+        note_content = repr(self.note_text_box.get(1.0, tk.END).strip())
         if self.Edit_File == True:
+            # Update existing note if in edit mode
             if note_content and tags_content and category:
                 for i in range(len(self.tree_Data)):
                     if self.tree_Data[i][0] == self.values[0] and self.tree_Data[i][1] == self.values[1] and self.tree_Data[i][2] == self.values[2]:
@@ -261,11 +284,11 @@ class NotesOrganizer:
                         file.write('\n\n')
                     messagebox.showinfo("Success","File saved successfully!")
                 self.Edit_File = False
-                self.Edit_File = False
                 self.Main_Menu()
             else:
                 messagebox.showerror("Error", "The note is incomplete!")
         else:
+            # Save a new note
             if note_content and tags_content and category:
                 data={
                     f"Category| {category}\nTags| {tags_content}\nText| {note_content}\nimage_path| {self.image_file_location}" 
@@ -280,15 +303,18 @@ class NotesOrganizer:
                 self.Main_Menu()
             else:
                 messagebox.showerror("Error", "The note is incomplete!")
-                
+
     def Open_Note(self):
+        """Open a selected note for editing."""
         self.Edit_File = True
+        # Get the selected item from the tree view
         self.selected_Data = self.tree.selection()
         self.values = self.tree.item(self.selected_Data, "values")
         self.Load_Notepad()
         self.Add_button_function()
         
         data=[' ', ' ', ' ', None]
+        # Read the file and parse its content to load the selected note
         with open(self.File_Path) as file:
             for line in file:
                 var1 = line.split("| ")
@@ -302,13 +328,16 @@ class NotesOrganizer:
                     elif key == "Text":
                         data[2] = value
                     elif key == 'image_path':
+                        # Match image path with the selected tree view item
                         if data[0]== self.values[0] and data[1] == self.values[1] and data[2] == self.values[2]:
                             data[3] = value
                         
             self.note_text_box.delete(1.0, tk.END)
+            # Load image if associated with the note
             if data[3] != 'None':
                 img = Image.open(data[3])
                 
+                # Resize image if it exceeds the maximum width
                 max_width = 600
                 if img.width > max_width:
                     ratio = max_width / img.width
@@ -316,64 +345,36 @@ class NotesOrganizer:
                     img = img.resize((max_width, new_height), Image.LANCZOS)
                 
                 photo = ImageTk.PhotoImage(img)
+                # Insert the image into the note text box
                 self.note_text_box.image_create(tk.END, image=photo)
                 
+                # Keep references to prevent garbage collection
                 if not hasattr(self.note_text_box, 'images'):
                     self.note_text_box.images = []
                 self.note_text_box.images.append(photo)
                 self.note_text_box.insert(tk.END, '\n')
             
+            # Load category, tags, and text content into their respective widgets
             self.category_dropdown.set(self.values[0])
             self.tag_text_box.delete(1.0, tk.END)
             self.tag_text_box.insert(tk.END, self.values[1])
-            self.note_text_box.insert(tk.END, self.values[2]) 
-
-    def Sidebar(self):
-        self.sidebar_Frame = tk.Frame(self.sidebar, bg="#2f3336", height=1080,width=250)
-        self.sidebar_Frame.pack()
-        self.sidebar_Frame.pack_propagate(False)
-        
-        main_Section = [
-            ("Home", "🏠")
-        ]
-        
-        dictionary = {"Home": self.Main_Menu
-                      }
-    
-        for item_text, emoji in main_Section:
-            button = tk.Button(
-                self.sidebar_Frame,
-                text=f"{emoji}  {item_text}",
-                font=("Arial",18),
-                fg="white",
-                bg="#2f3336",
-                activebackground='#383838',
-                activeforeground="white",
-                relief=tk.FLAT,
-                anchor='w',
-                padx=15,
-                width=25,
-                pady=20,
-                borderwidth=0,
-                command = dictionary.get(item_text)
-            )
-            button.pack(fill=tk.X)
+            self.note_text_box.insert(tk.END, eval(self.values[2])) 
 
     def Clear_Frame(self):
+        """Clear all widgets in the main container."""
         for widget in self.container.winfo_children():
             widget.destroy()
 
-    def Clear_Sidebar_Frame(self):
-        for widget in self.sidebar.winfo_children():
-            widget.destroy()
-
     def Mouse_Scroll(self,event):
+        """Enable mouse scrolling for the tree view."""
         self.tree.yview_scroll((event.delta // 120), "units")
         
     def Load_Notepad(self):
+        """Load notes from the file into memory."""
         i = 0
         self.tree_Data=[]
         data=[' ', ' ', ' ', ' ']
+        # Read and parse file data
         with open(self.File_Path) as file:
             for line in file:
                 var1 = line.split("| ")
@@ -398,33 +399,34 @@ class NotesOrganizer:
                     i = 0
     
     def Load_Into_Tree(self):
+        """Populate the tree view with loaded notes."""
         for row in self.tree.get_children():
             self.tree.delete(row)
         for i in range(len(self.tree_Data)):
             self.tree.insert('', tk.END, values=(self.tree_Data[i][0], self.tree_Data[i][1], self.tree_Data[i][2]))
     
     def Right_Click_Menu(self, event):
+        """Display a context menu on right-click in the tree view."""
         row_Id = self.tree.identify_row(event.y)
         if row_Id:
             self.tree.selection_set(row_Id)
             self.rg_Click_Menu.post(event.x_root, event.y_root)
-    
-    def Check_Data(self):
-        if not os.path.exists(self.File_Path):
-            with open(self.File_Path, 'w')as file:
-                file.write("")
+            
 
     def Check_Note(self):
+        """Check if the note file exists, and initialize it if empty."""
         if not os.path.exists(self.File_Path):
             with open(self.File_Path, 'w') as file:
                 file.write(" ")
     
     def Delete_Note(self):
+        """Delete the selected note from the tree view and file."""
         selected_Data = self.tree.selection()
         self.tree.delete(selected_Data)
         self.Update_Note()
         
     def Update_Note(self):
+        """Update the note file with the current tree view data."""
         rows = self.tree.get_children()
         data = []
         for row in rows:
@@ -438,7 +440,6 @@ class NotesOrganizer:
                     tree_category == d[0] and tree_tag == d[1] and tree_text == d[2]
                     for d in data
                 )
-                
                 if exists_in_data:
                     file_data = (
                         f"Category| {tree_category}\n"
@@ -448,7 +449,7 @@ class NotesOrganizer:
                     )
                     file.write(file_data)
 
-
 def note():
+    """Run the Notes Organizer application."""
     app = NotesOrganizer()
     app.run()
