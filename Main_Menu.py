@@ -198,7 +198,7 @@ class MainMenu:
 
         self.btexpense_subpage = Button(
             self.expense_Lable_frame,
-            text="Expense_Tracker",
+            text="Expense Tracker",
             fg= "white",
             font=("Arial", 20, "bold"),
             width=15,
